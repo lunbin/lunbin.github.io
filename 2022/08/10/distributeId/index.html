@@ -17,7 +17,7 @@
         
     </title>
 
-    <link rel="canonical" href="http://github.com/lunbin/lunbin.github.io/2022/08/10/distributeId/">
+    <link rel="canonical" href="http://lunbin.github.io/2022/08/10/distributeId/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -149,7 +149,7 @@
     <!-- Main Content -->
     
 <!-- Image to hack wechat -->
-<!-- <img src="http://github.com/lunbin/lunbin.github.io/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://lunbin.github.io/img/icon_wechat.png" width="0" height="0"> -->
 <!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
 
 <!-- Post Header -->
@@ -279,7 +279,7 @@
 <li>依赖与系统时间的一致性，如果系统时间被回调，或者改变，可能会造成id冲突或者重复。</li>
 </ul>
 <hr>
-<h3 id="百度uid-generator"><a href="#百度uid-generator" class="headerlink" title="百度uid-generator"></a>百度uid-generator</h3><p>​        项目GitHub地址：<a href="https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和">https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和</a> 序列号等各部分的位数，而且uid-generator中采用用户自定义workId的生成策略。</p>
+<h3 id="百度uid-generator"><a href="#百度uid-generator" class="headerlink" title="百度uid-generator"></a>百度uid-generator</h3><p>​        项目GitHub地址：<a href="https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和" target="_blank" rel="noopener">https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和</a> 序列号等各部分的位数，而且uid-generator中采用用户自定义workId的生成策略。</p>
 <p>​        uid-generator需要与数据库配合使用，需要新增一个WORKER_NODE表。当应用启动时会向数据库表中去插入一条数据，插入成功后返回的自增ID就是该机器的workId数据由host，port组成。</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">--------+---------------+----------------+----------------+</span></span><br><span class="line">| sign   | delta seconds | worker_node_id |     sequence   |</span><br><span class="line">+<span class="comment">--------+---------------+----------------+----------------+</span></span><br><span class="line">   1bit	      28bit	           22bit	         13bit</span><br></pre></td></tr></table></figure>
 <p>由上图可知，UidGenerator的时间部分只有28位，这就意味着UidGenerator默认只能承受8.5年（2^28-1/86400/365）。当然，根据你业务的需求，UidGenerator可以适当调整delta seconds、worker node id和sequence占用位数。</p>
@@ -347,7 +347,7 @@
 <li>每隔一段时间(3s)上报自身系统时间写入leaf_forever/${self}。</li>
 </ol>
 <hr>
-<h3 id="TinyId"><a href="#TinyId" class="headerlink" title="TinyId"></a>TinyId</h3><p>​        Tinyid由滴滴开发，Github地址：<a href="https://github.com/didi/tinyid">https://github.com/didi/tinyid</a></p>
+<h3 id="TinyId"><a href="#TinyId" class="headerlink" title="TinyId"></a>TinyId</h3><p>​        Tinyid由滴滴开发，Github地址：<a href="https://github.com/didi/tinyid" target="_blank" rel="noopener">https://github.com/didi/tinyid</a></p>
 <p>​        Tinyid是一个ID生成器服务，它提供了REST API和Java客户端两种获取方式，如果使用Java客户端获取方式的话，官方宣称能单实例能达到1kw QPS（Over10 million QPSper single instance when using the java client.）</p>
 <p>​        Tinyid原理就是经典的segment模式，和美团的leaf原理几乎一致。原理图如下所示，以同一个bizType为例，每个tinyid-server会分配到不同的segment，例如第一个tinyid-server分配到(1000, 2000]，第二个tinyid-server分配到(2000, 3000]，第3个tinyid-server分配到(3000, 4000]：</p>
 <p><img src="distributeId-7.png" style="zoom:60%;"></p>
@@ -374,12 +374,6 @@
 
                 
 
-                
-                <!-- disqus 评论框 start -->
-                <div class="comment">
-                    <div id="disqus_thread" class="disqus-thread"></div>
-                </div>
-                <!-- disqus 评论框 end -->
                 
 
             </div>
@@ -438,21 +432,6 @@
 
 
 
-<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = "hexo-theme-huxblog";
-    var disqus_identifier = "http://github.com/lunbin/lunbin.github.io/2022/08/10/distributeId/";
-    var disqus_url = "http://github.com/lunbin/lunbin.github.io/2022/08/10/distributeId/";
-
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<!-- disqus 公共JS代码 end -->
-
 
 
 
@@ -502,7 +481,7 @@
                 
                 
                     <li>
-                        <a target="_blank" href="https://twitter.com/Demonbane_x">
+                        <a target="_blank" href="https://twitter.com/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
@@ -512,7 +491,7 @@
                 
                 
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/Demonbane">
+                        <a target="_blank" href="https://www.zhihu.com/people/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -523,7 +502,7 @@
 
                 
                     <li>
-                        <a target="_blank" href="http://weibo.com/Demonbane">
+                        <a target="_blank" href="http://weibo.com/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
@@ -534,7 +513,7 @@
 
                 
                     <li>
-                        <a target="_blank" href="https://www.facebook.com/demonbane.cn">
+                        <a target="_blank" href="https://www.facebook.com/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
@@ -545,7 +524,7 @@
 
                 
                     <li>
-                        <a target="_blank"  href="https://github.com/Kaijun">
+                        <a target="_blank"  href="https://github.com/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -556,7 +535,7 @@
 
                 
                     <li>
-                        <a target="_blank"  href="https://www.linkedin.com/in/kaijun-chen-42089354">
+                        <a target="_blank"  href="https://www.linkedin.com/in/lunbin">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
@@ -630,7 +609,7 @@
 <script>
     // only load tagcloud.js in tag.html
     if($('#tag_cloud').length !== 0){
-        async("http://github.com/lunbin/lunbin.github.io/js/jquery.tagcloud.js",function(){
+        async("http://lunbin.github.io/js/jquery.tagcloud.js",function(){
             $.fn.tagcloud.defaults = {
                 //size: {start: 1, end: 1, unit: 'em'},
                 color: {start: '#bbbbee', end: '#0085a1'},
@@ -694,7 +673,7 @@
 
 
 <!-- Image to hack wechat -->
-<img src="http://github.com/lunbin/lunbin.github.io/img/icon_wechat.png" width="0" height="0" />
+<img src="http://lunbin.github.io/img/icon_wechat.png" width="0" height="0" />
 <!-- Migrate from head to bottom, no longer block render and still work -->
 
 </body>
