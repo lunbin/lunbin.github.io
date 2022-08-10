@@ -17,7 +17,7 @@
         
     </title>
 
-    <link rel="canonical" href="http://kaijun.rocks/hexo-theme-huxblog/2021/09/10/kubebuilder/">
+    <link rel="canonical" href="http://github.com/lunbin/lunbin.github.io/2021/09/10/kubebuilder/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -149,7 +149,7 @@
     <!-- Main Content -->
     
 <!-- Image to hack wechat -->
-<!-- <img src="http://kaijun.rocks/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="http://github.com/lunbin/lunbin.github.io/img/icon_wechat.png" width="0" height="0"> -->
 <!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
 
 <!-- Post Header -->
@@ -198,7 +198,7 @@
                 <h3 id="kubebuilder-笔记"><a href="#kubebuilder-笔记" class="headerlink" title="kubebuilder 笔记"></a>kubebuilder 笔记</h3><blockquote>
 <p><strong>导读：</strong>自定义资源 CRD（Custom Resource Definition）可以扩展 Kubernetes API，掌握 CRD 是成为 Kubernetes 高级玩家的必备技能，本文将介绍 CRD 编写框架 Kubebuilder基本使用方法，让您真正理解并能快速开发 CRD。</p>
 </blockquote>
-<p><a href="https://github.com/kubernetes-sigs/kubebuilder" target="_blank" rel="noopener">Kubebuilder</a> 是一个使用 CRDs 构建 K8s API 的 SDK，主要是：</p>
+<p><a href="https://github.com/kubernetes-sigs/kubebuilder">Kubebuilder</a> 是一个使用 CRDs 构建 K8s API 的 SDK，主要是：</p>
 <ul>
 <li><p>提供脚手架工具初始化 CRDs 工程，自动生成 boilerplate 代码和配置；</p>
 </li>
@@ -304,7 +304,7 @@
 </ul>
 <p><strong>Operator处理流程</strong>：</p>
 <p>1)   Crd向scheme注册资源<br>2)   Cache中会生成注册资源对应的informer，用于事件的通知<br>3)   创建cr或者更新cr在线文件，生成该资源的event，cache watch到该event后将其放入workqueue中<br>4)   Controller中的核心的逻辑代码从workqueue中取出event，触发reconcile方法<br>5)   Controller中reconcile利用controller runtime包对资源进行读写， 写的时候是通过api server， 读的时候是直接读cache</p>
-<h5 id="同类工具比较"><a href="#同类工具比较" class="headerlink" title="同类工具比较"></a>同类工具比较</h5><p><a href="https://github.com/operator-framework/operator-sdk" target="_blank" rel="noopener">Operator Framework</a> 与 Kubebuilder 很类似，这里因为篇幅关系不再展开。</p>
+<h5 id="同类工具比较"><a href="#同类工具比较" class="headerlink" title="同类工具比较"></a>同类工具比较</h5><p><a href="https://github.com/operator-framework/operator-sdk">Operator Framework</a> 与 Kubebuilder 很类似，这里因为篇幅关系不再展开。</p>
 <h4 id="k8s-operator-demo-gitee-repo"><a href="#k8s-operator-demo-gitee-repo" class="headerlink" title="k8s-operator demo gitee repo"></a>k8s-operator demo gitee repo</h4><p><a href="https://gitee.com/lbsheng92/k8s-operator" target="_blank" rel="noopener">gitee-repo</a></p>
 <h4 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h4><ol>
 <li>使用 OwnerRefrence 来做资源关联，有两个特性：<ul>
@@ -409,8 +409,8 @@
 <script type="text/javascript">
     /* * * CONFIGURATION VARIABLES * * */
     var disqus_shortname = "hexo-theme-huxblog";
-    var disqus_identifier = "http://kaijun.rocks/hexo-theme-huxblog/2021/09/10/kubebuilder/";
-    var disqus_url = "http://kaijun.rocks/hexo-theme-huxblog/2021/09/10/kubebuilder/";
+    var disqus_identifier = "http://github.com/lunbin/lunbin.github.io/2021/09/10/kubebuilder/";
+    var disqus_url = "http://github.com/lunbin/lunbin.github.io/2021/09/10/kubebuilder/";
 
     (function() {
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -597,7 +597,7 @@
 <script>
     // only load tagcloud.js in tag.html
     if($('#tag_cloud').length !== 0){
-        async("http://kaijun.rocks/hexo-theme-huxblog/js/jquery.tagcloud.js",function(){
+        async("http://github.com/lunbin/lunbin.github.io/js/jquery.tagcloud.js",function(){
             $.fn.tagcloud.defaults = {
                 //size: {start: 1, end: 1, unit: 'em'},
                 color: {start: '#bbbbee', end: '#0085a1'},
@@ -661,7 +661,7 @@
 
 
 <!-- Image to hack wechat -->
-<img src="http://kaijun.rocks/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0" />
+<img src="http://github.com/lunbin/lunbin.github.io/img/icon_wechat.png" width="0" height="0" />
 <!-- Migrate from head to bottom, no longer block render and still work -->
 
 </body>
