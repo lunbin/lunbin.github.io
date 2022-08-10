@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/hexo-theme-huxblog/img/favicon.ico">
+
+    <title>
+        
+          kubebuilder 初体验 - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/2021/09/10/kubebuilder/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/hexo-theme-huxblog/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/hexo-theme-huxblog/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/about/">关于我</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/hexo-theme-huxblog/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#kubebuilder" title="kubebuilder">kubebuilder</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#crd" title="crd">crd</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#operator" title="operator">operator</a>
+                        
+                    </div>
+                    <h1>kubebuilder 初体验</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2021-09-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h3 id="kubebuilder-笔记"><a href="#kubebuilder-笔记" class="headerlink" title="kubebuilder 笔记"></a>kubebuilder 笔记</h3><blockquote>
+<p><strong>导读：</strong>自定义资源 CRD（Custom Resource Definition）可以扩展 Kubernetes API，掌握 CRD 是成为 Kubernetes 高级玩家的必备技能，本文将介绍 CRD 编写框架 Kubebuilder基本使用方法，让您真正理解并能快速开发 CRD。</p>
+</blockquote>
+<p><a href="https://github.com/kubernetes-sigs/kubebuilder" target="_blank" rel="noopener">Kubebuilder</a> 是一个使用 CRDs 构建 K8s API 的 SDK，主要是：</p>
+<ul>
+<li><p>提供脚手架工具初始化 CRDs 工程，自动生成 boilerplate 代码和配置；</p>
+</li>
+<li><p>提供代码库封装底层的 K8s go-client；</p>
+<p>方便用户从零开始开发 CRDs，Controllers 和 Admission Webhooks 来扩展 K8s。</p>
+</li>
+</ul>
+<h3 id="使用步骤"><a href="#使用步骤" class="headerlink" title="使用步骤"></a>使用步骤</h3><ul>
+<li><p>下载kubebuilder</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -L -o kubebuilder https:<span class="regexp">//g</span>o.kubebuilder.io<span class="regexp">/dl/</span>latest<span class="regexp">/$(go env GOOS)/</span>$(go env GOARCH)</span><br><span class="line"></span><br><span class="line">chmod +x kubebuilder &amp;&amp; mv kubebuilder <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>create project</p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p ~<span class="string">/projects/guestbook</span></span><br><span class="line"><span class="keyword">cd</span> ~<span class="string">/projects/guestbook</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>init project</p>
+<figure class="highlight brainfuck"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">kubebuilder</span> <span class="comment">init</span> --<span class="comment">domain</span> <span class="comment">my</span><span class="string">.</span><span class="comment">domain</span> --<span class="comment">repo</span> <span class="comment">my</span><span class="string">.</span><span class="comment">domain/guestbook</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">example：</span></span><br><span class="line"><span class="comment">kubebuilder</span> <span class="comment">init</span> --<span class="comment">domain</span> <span class="comment">isrc</span><span class="string">.</span><span class="comment">dataplatform</span> --<span class="comment">repo</span> <span class="comment">isrc</span><span class="string">.</span><span class="comment">dataplatform/dataproduct</span></span><br><span class="line"><span class="comment">kubebuilder</span> <span class="comment">init</span> --<span class="comment">domain</span> <span class="comment">isrc</span><span class="string">.</span><span class="comment">dataplatform</span> --<span class="comment">repo</span> <span class="comment">isrc</span><span class="string">.</span><span class="comment">dataplatform/productmanager</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>create a api</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubebuilder create api --<span class="keyword">group</span> <span class="title">webapp</span> --<span class="keyword">version</span> v1 --kind Guestbook</span><br><span class="line"></span><br><span class="line">example:</span><br><span class="line">kubebuilder create api --<span class="keyword">group</span> <span class="title">webapp</span> --<span class="keyword">version</span> v1 --kind DataProductManager</span><br><span class="line">kubebuilder create api --<span class="keyword">group</span> <span class="title">webapp</span> --<span class="keyword">version</span> v1 --kind DataProduct</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>create crd</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make <span class="keyword">install</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>create controller</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">本地部署：<span class="keyword">make</span> run</span><br><span class="line">集群部署： </span><br><span class="line">   <span class="number">1</span>. build image</span><br><span class="line">   $roo<span class="variable">t:</span> <span class="keyword">make</span> docker-build docker-push IMG=<span class="symbol">&lt;some-registry&gt;</span>/<span class="symbol">&lt;project-name&gt;</span>:<span class="keyword">tag</span></span><br><span class="line">   注： </span><br><span class="line">   * 修改Dockerfile，gcr.io/distroless/static:nonroot 这个镜像国内拉不下来。 FROM gcr.io/distroless/static:nonroot 改成 FROM golan<span class="variable">g:1</span>.<span class="number">16</span>。</span><br><span class="line">   * Dockerfile中在 RUN <span class="keyword">go</span> <span class="keyword">mod</span> download 之前加上 ENV GOPROXY=http<span class="variable">s:</span>//goproxy.<span class="keyword">cn</span>,direct，或者RUN <span class="keyword">go</span> env -<span class="keyword">w</span> GOPROXY=http<span class="variable">s:</span>//goproxy.<span class="keyword">cn</span>,direct 用于修改代理</span><br><span class="line">   </span><br><span class="line">   <span class="number">2</span>. deploy controller <span class="keyword">to</span> k8s</span><br><span class="line">   $roo<span class="variable">t:</span> <span class="keyword">make</span> deploy IMG=<span class="symbol">&lt;some-registry&gt;</span>/<span class="symbol">&lt;project-name&gt;</span>:<span class="keyword">tag</span></span><br><span class="line">   注： </span><br><span class="line">   * controller中有两个容器， 一个使用的是上面的build出来的image，另一个是gcr.io/kubebuilder/kube-rbac-proxy:v0.<span class="number">8.0</span> 这个image没有国内也拉不下来。 使用国内替代的镜像 docker pull katanomi/kubebuilder-kube-rbac-proxy:v0.<span class="number">8.0</span>(修改文文件 config/default/xxx_proxy_xxx.yaml 文件中的image)</span><br></pre></td></tr></table></figure>
+<p>修改后的Dockerfile</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Build the manager binary</span></span><br><span class="line"><span class="comment"># image: data-product-manager-controller:test-0.1</span></span><br><span class="line"><span class="keyword">FROM</span> golang:1.16 as builder</span><br><span class="line"></span><br><span class="line">WORKDIR /workspace</span><br><span class="line"><span class="comment"># Copy the Go Modules manifests</span></span><br><span class="line">COPY go.mod go.mod</span><br><span class="line">COPY go.sum go.sum</span><br><span class="line"><span class="comment"># cache deps before building and copying source so that we don't need to re-download as much</span></span><br><span class="line"><span class="comment"># and so that source changes don't invalidate our downloaded layer</span></span><br><span class="line"><span class="builtin-name">RUN</span> go env -w <span class="attribute">GOPROXY</span>=https://goproxy.cn,direct</span><br><span class="line"><span class="builtin-name">RUN</span> go mod download</span><br><span class="line"></span><br><span class="line"><span class="comment"># Copy the go source</span></span><br><span class="line">COPY main.go main.go</span><br><span class="line">COPY api/ api/</span><br><span class="line">COPY controllers/ controllers/</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build</span></span><br><span class="line"><span class="builtin-name">RUN</span> <span class="attribute">CGO_ENABLED</span>=0 <span class="attribute">GOOS</span>=linux <span class="attribute">GOARCH</span>=amd64 go build -a -o manager main.go</span><br><span class="line"></span><br><span class="line"><span class="comment"># Use distroless as minimal base image to package the manager binary</span></span><br><span class="line"><span class="comment"># Refer to https://github.com/GoogleContainerTools/distroless for more details</span></span><br><span class="line"><span class="comment">#FROM gcr.io/distroless/static:nonroot</span></span><br><span class="line"><span class="keyword">FROM</span> golang:1.16</span><br><span class="line">WORKDIR /</span><br><span class="line">COPY <span class="attribute">--from</span>=builder /workspace/manager .</span><br><span class="line">USER 65532:65532</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [<span class="string">"/manager"</span>]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>create cr</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f <span class="built_in">config</span>/sample/xxxx.yaml</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li>其他的具体开发只需要关注controller.go 以及api目录下的文件即可</li>
+</ul>
+<h2 id="operator开发"><a href="#operator开发" class="headerlink" title="operator开发"></a>operator开发</h2><h4 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h4><ul>
+<li><p>operator 可以简单理解为 cr + crd +controller</p>
+</li>
+<li><p>crd： 自定义的资源</p>
+</li>
+<li><p>cr：自定义资源的一个实例</p>
+</li>
+<li><p>controller： 实例的控制逻辑</p>
+</li>
+</ul>
+<p>（可以理解为crd是一种类， cr是这个类的一个实例， 这个cr要干什么的逻辑定义在controller中）</p>
+<h4 id="生成代码结构"><a href="#生成代码结构" class="headerlink" title="生成代码结构"></a>生成代码结构</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">├── Dockerfile</span><br><span class="line">├── Makefile</span><br><span class="line">├── PROJECT</span><br><span class="line">├── api</span><br><span class="line">│   └── v1</span><br><span class="line">│       ├── groupversion_info.go</span><br><span class="line">│       ├── guestbook_types.go</span><br><span class="line">│       └── zz_generated.deepcopy.go</span><br><span class="line">├── bin</span><br><span class="line">│   ├── controller-gen</span><br><span class="line">│   └── kustomize</span><br><span class="line">├── cmd</span><br><span class="line">├── config</span><br><span class="line">│   ├── crd</span><br><span class="line">│   │   ├── bases</span><br><span class="line">│   │   ├── kustomization.yaml</span><br><span class="line">│   │   ├── kustomizeconfig.yaml</span><br><span class="line">│   │   └── patches</span><br><span class="line">│   ├── default</span><br><span class="line">│   │   ├── kustomization.yaml</span><br><span class="line">│   │   ├── manager_auth_proxy_patch.yaml</span><br><span class="line">│   │   └── manager_config_patch.yaml</span><br><span class="line">│   ├── manager</span><br><span class="line">│   │   ├── controller_manager_config.yaml</span><br><span class="line">│   │   ├── kustomization.yaml</span><br><span class="line">│   │   └── manager.yaml</span><br><span class="line">│   ├── prometheus</span><br><span class="line">│   │   ├── kustomization.yaml</span><br><span class="line">│   │   └── monitor.yaml</span><br><span class="line">│   ├── rbac</span><br><span class="line">│   │   ├── auth_proxy_client_clusterrole.yaml</span><br><span class="line">│   │   ├── auth_proxy_role.yaml</span><br><span class="line">│   │   ├── auth_proxy_role_binding.yaml</span><br><span class="line">│   │   ├── auth_proxy_service.yaml</span><br><span class="line">│   │   ├── guestbook_editor_role.yaml</span><br><span class="line">│   │   ├── guestbook_viewer_role.yaml</span><br><span class="line">│   │   ├── kustomization.yaml</span><br><span class="line">│   │   ├── leader_election_role.yaml</span><br><span class="line">│   │   ├── leader_election_role_binding.yaml</span><br><span class="line">│   │   ├── role.yaml</span><br><span class="line">│   │   ├── role_binding.yaml</span><br><span class="line">│   │   └── service_account.yaml</span><br><span class="line">│   └── samples</span><br><span class="line">│       └── webapp_v1_guestbook.yaml</span><br><span class="line">├── controllers</span><br><span class="line">│   ├── guestbook_controller.go</span><br><span class="line">│   └── suite_test.go</span><br><span class="line">├── cover.out</span><br><span class="line">├── demo.go</span><br><span class="line">├── go.mod</span><br><span class="line">├── go.sum</span><br><span class="line">├── hack</span><br><span class="line">│   └── boilerplate.go.txt</span><br><span class="line">├── main.go</span><br><span class="line">└── testbin</span><br><span class="line">    ├── bin</span><br><span class="line">    │   ├── etcd</span><br><span class="line">    │   ├── kube-apiserver</span><br><span class="line">    │   └── kubectl</span><br><span class="line">    └── setup-envtest.sh</span><br></pre></td></tr></table></figure>
+<p>​    </p>
+<ul>
+<li><p>目录解析</p>
+<ul>
+<li><p>Dockerfile： 用于build controller镜像</p>
+</li>
+<li><p>Makefile： 编译部署管理工具</p>
+</li>
+<li><p>api/v1/xxxx_types.go： 定义crd字段， 主要定义spec以及status。 controller会根据spec中的字段值，做出相应的行为</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GuestbookSpec defines the desired state of Guestbook</span></span><br><span class="line"><span class="keyword">type</span> GuestbookSpec <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster</span></span><br><span class="line">	<span class="comment">// Important: Run "make" to regenerate code after modifying this file</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Foo is an example field of Guestbook. Edit guestbook_types.go to remove/update</span></span><br><span class="line">	Foo       <span class="keyword">string</span> <span class="string">`json:"foo,omitempty"`</span></span><br><span class="line">	FirstName <span class="keyword">string</span> <span class="string">`json:"firstname"`</span></span><br><span class="line">	LastName  <span class="keyword">string</span> <span class="string">`json:"lastname"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GuestbookStatus defines the observed state of Guestbook</span></span><br><span class="line"><span class="keyword">type</span> GuestbookStatus <span class="keyword">struct</span> &#123;</span><br><span class="line">	<span class="comment">// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster</span></span><br><span class="line">	<span class="comment">// Important: Run "make" to regenerate code after modifying this file</span></span><br><span class="line">	Status <span class="keyword">string</span> <span class="string">`json:"Status"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//+kubebuilder:object:root=true</span></span><br><span class="line"><span class="comment">//+kubebuilder:subresource:status</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Guestbook is the Schema for the guestbooks API</span></span><br><span class="line"><span class="keyword">type</span> Guestbook <span class="keyword">struct</span> &#123;</span><br><span class="line">	metav1.TypeMeta   <span class="string">`json:",inline"`</span></span><br><span class="line">	metav1.ObjectMeta <span class="string">`json:"metadata,omitempty"`</span></span><br><span class="line"></span><br><span class="line">	Spec   GuestbookSpec   <span class="string">`json:"spec,omitempty"`</span></span><br><span class="line">	Status GuestbookStatus <span class="string">`json:"status,omitempty"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//+kubebuilder:object:root=true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// GuestbookList contains a list of Guestbook</span></span><br><span class="line"><span class="keyword">type</span> GuestbookList <span class="keyword">struct</span> &#123;</span><br><span class="line">	metav1.TypeMeta <span class="string">`json:",inline"`</span></span><br><span class="line">	metav1.ListMeta <span class="string">`json:"metadata,omitempty"`</span></span><br><span class="line">	Items           []Guestbook <span class="string">`json:"items"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>config目录 ： 该目录下的文件主要一些用于生成crd， cr以及controller部署文件（利用bin目录下的两个工具 controler-gen 以及 kustomize）</li>
+</ul>
+<ul>
+<li><p>controller目录： 该目录下的xxxx_controller.go 是最重要的文件， 用户需要在这个文件中配合api/v1/xxx_types.go填写逻辑代码。 只需要填写reconcile方法即可。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *GuestbookReconciler)</span> <span class="title">Reconcile</span><span class="params">(ctx context.Context, req ctrl.Request)</span> <span class="params">(ctrl.Result, error)</span></span> &#123;</span><br><span class="line">	_ = log.FromContext(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// your logic here</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// _ = r.Log.WithValues("apiexamplea", req.NamespacedName)</span></span><br><span class="line">	obj := &amp;webappv1.Guestbook&#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> err := r.Get(ctx, req.NamespacedName, obj); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Log.Error(err, <span class="string">"Unable to fetch object"</span>)</span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		log.Log.Info(time.Now().Location().String())</span><br><span class="line">		log.Log.Info(<span class="string">"Geeting from Kubebuilder to"</span>, <span class="string">"firstName"</span>, obj.Spec.FirstName, <span class="string">"lastName"</span>, obj.Spec.LastName)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 初始化 CR 的 Status 为 Running</span></span><br><span class="line">	obj.Status.Status = <span class="string">"Running"</span></span><br><span class="line">	<span class="keyword">if</span> err := r.Status().Update(ctx, obj); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Log.Error(err, <span class="string">"unable to update status"</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// err2 := r.Delete(ctx, obj, client.PropagationPolicy(metav1.DeletePropagationBackground))</span></span><br><span class="line">		<span class="comment">// if err2 != nil &#123;</span></span><br><span class="line">		<span class="comment">// 	log.Log.Error(err2, "")</span></span><br><span class="line">		<span class="comment">// &#125;</span></span><br><span class="line">		log.Log.Info(<span class="string">"Getting status from Kubebuilder"</span>, <span class="string">"status"</span>, obj.Status.Status)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// return ctrl.Result&#123;&#125;, nil 正常结束</span></span><br><span class="line"><span class="comment">// return ctrl.Result&#123;&#125;, err 会重新入工作队列， 会被再次触发reconcile</span></span><br><span class="line"><span class="comment">// return ctrl.Result&#123;Requeue:true&#125;, nil 重新入工作队列</span></span><br><span class="line"><span class="comment">// eturn ctrl.Result&#123;RequeueAfter: time.Minute&#125;, nil  一分钟以后再入工作队列</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SetupWithManager sets up the controller with the Manager.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *GuestbookReconciler)</span> <span class="title">SetupWithManager</span><span class="params">(mgr ctrl.Manager)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ctrl.NewControllerManagedBy(mgr).</span><br><span class="line">		For(&amp;webappv1.Guestbook&#123;&#125;).</span><br><span class="line">		Owns(&amp;appsv1.Deployment&#123;&#125;).</span><br><span class="line">		<span class="comment">// Watches(&amp;source.Kind&#123;Type: &amp;apps.Deployment&#123;&#125;&#125;, &amp;handler.EnqueueRequestForObject&#123;&#125;).</span></span><br><span class="line">		Complete(r)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 这个方法用于表示需要监控哪些资源， 上面的代码表示监控 GuestBook这个资源以及跟他关联的deployment资源， 一旦这两种两种资源出现修改，会触发调用reconcile方法</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><p>main.go:  整个operator的入口</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1 初始化manager</span></span><br><span class="line">	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options&#123;</span><br><span class="line">		Scheme:                 scheme,</span><br><span class="line">		MetricsBindAddress:     metricsAddr,</span><br><span class="line">		Port:                   <span class="number">9443</span>,</span><br><span class="line">		HealthProbeBindAddress: probeAddr,</span><br><span class="line">		LeaderElection:         enableLeaderElection,</span><br><span class="line">		LeaderElectionID:       <span class="string">"dfbd12f6.isrc.dataplatform"</span>,</span><br><span class="line">	&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		setupLog.Error(err, <span class="string">"unable to start manager"</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2 init Reconciler（Controller）</span></span><br><span class="line">	<span class="keyword">if</span> err = (&amp;controllers.DataProductManagerReconciler&#123;</span><br><span class="line">		Client: mgr.GetClient(),</span><br><span class="line">		Scheme: mgr.GetScheme(),</span><br><span class="line">	&#125;).SetupWithManager(mgr); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		setupLog.Error(err, <span class="string">"unable to create controller"</span>, <span class="string">"controller"</span>, <span class="string">"DataProductManager"</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//+kubebuilder:scaffold:builder</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := mgr.AddHealthzCheck(<span class="string">"healthz"</span>, healthz.Ping); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		setupLog.Error(err, <span class="string">"unable to set up health check"</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> err := mgr.AddReadyzCheck(<span class="string">"readyz"</span>, healthz.Ping); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		setupLog.Error(err, <span class="string">"unable to set up ready check"</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	setupLog.Info(<span class="string">"starting manager"</span>)</span><br><span class="line">    <span class="comment">// 3 start manager</span></span><br><span class="line">	<span class="keyword">if</span> err := mgr.Start(ctrl.SetupSignalHandler()); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		setupLog.Error(err, <span class="string">"problem running manager"</span>)</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="kubebuilder-与-k8s的交互原理"><a href="#kubebuilder-与-k8s的交互原理" class="headerlink" title="kubebuilder 与 k8s的交互原理"></a>kubebuilder 与 k8s的交互原理</h4><p><img src="kubebuilder-1.png" style="zoom:50%;"></p>
+<ul>
+<li><strong>User Define</strong>：自定义部分包括crds，以及controllers。Crd即自定义资源， controller即利用go语言开发的处理逻辑， controller通过client读资源进行读写。</li>
+</ul>
+<ul>
+<li><strong>Utilities</strong>： 辅助工具，包括finalizer， OwnerReference以及index。<ul>
+<li>Finalizer： 删除资源之前清理环境</li>
+<li>OwnerReference：用于资源关联， 使得关联对象的变更也可以触发owner对象controller的Reconcile方法，另外owner资源删除，利用k8s gc，被owner的资源也会被联级删除</li>
+<li>Index：controller需要对cache进行查询，index可加快查询速度</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>Scaffold</strong>： 利用k8s client-go runtime包，实现与k8s api server 交互。主要包括scheme， cache，以及client。<ul>
+<li>Scheme： 用于crd 资源注册，提供了kinds与对应的go types的映射</li>
+<li>Cache: 监控scheme中注册的资源， 使用informer机制触发自定义的reconcile逻辑</li>
+<li>Clients： 通过api server 与k8s交互对资源进行读写</li>
+</ul>
+</li>
+</ul>
+<p><strong>Operator处理流程</strong>：</p>
+<p>1)   Crd向scheme注册资源<br>2)   Cache中会生成注册资源对应的informer，用于事件的通知<br>3)   创建cr或者更新cr在线文件，生成该资源的event，cache watch到该event后将其放入workqueue中<br>4)   Controller中的核心的逻辑代码从workqueue中取出event，触发reconcile方法<br>5)   Controller中reconcile利用controller runtime包对资源进行读写， 写的时候是通过api server， 读的时候是直接读cache</p>
+<h5 id="同类工具比较"><a href="#同类工具比较" class="headerlink" title="同类工具比较"></a>同类工具比较</h5><p><a href="https://github.com/operator-framework/operator-sdk" target="_blank" rel="noopener">Operator Framework</a> 与 Kubebuilder 很类似，这里因为篇幅关系不再展开。</p>
+<h4 id="k8s-operator-demo-gitee-repo"><a href="#k8s-operator-demo-gitee-repo" class="headerlink" title="k8s-operator demo gitee repo"></a>k8s-operator demo gitee repo</h4><p><a href="https://gitee.com/lbsheng92/k8s-operator" target="_blank" rel="noopener">gitee-repo</a></p>
+<h4 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h4><ol>
+<li>使用 OwnerRefrence 来做资源关联，有两个特性：<ul>
+<li>Owner 资源被删除，被 Own 的资源会被级联删除，这利用了 K8s 的 GC；</li>
+<li>被 Own 的资源对象的事件变更可以触发 Owner 对象的 Reconcile 方法；</li>
+</ul>
+</li>
+<li>使用 Finalizer 来做资源的清理。不使用 Finalizer 时，资源被删除无法获取任何信息；</li>
+<li>对象的 Status 字段变化也会触发 Reconcile 方法；</li>
+<li>Reconcile 逻辑需要幂等；</li>
+</ol>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>​        Kubebuilder 提供的功能对于快速编写 CRD 和 Controller 是十分有帮助的，无论是 Istio、Knative 等知名项目还是各种自定义 Operators，都大量使用了 CRD，将各种组件抽象为 CRD，Kubernetes 变成控制面板将成为一个趋势，希望本文能够帮助大家理解和把握这个趋势。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://www.cnblogs.com/alisystemsoftware/p/11580202.html" target="_blank" rel="noopener">https://www.cnblogs.com/alisystemsoftware/p/11580202.html</a></p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/hexo-theme-huxblog/2021/10/10/data-mash/" data-toggle="tooltip" data-placement="top" title="data-mash">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/hexo-theme-huxblog/2021/08/10/spark-function/" data-toggle="tooltip" data-placement="top" title="spark基础算子总结">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/hexo-theme-huxblog/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#kubebuilder" title="kubebuilder">kubebuilder</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#crd" title="crd">crd</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#operator" title="operator">operator</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hexo-theme-huxblog";
+    var disqus_identifier = "http://kaijun.rocks/hexo-theme-huxblog/2021/09/10/kubebuilder/";
+    var disqus_url = "http://kaijun.rocks/hexo-theme-huxblog/2021/09/10/kubebuilder/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/Demonbane_x">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/demonbane.cn">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Kaijun">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/kaijun-chen-42089354">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2022 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/hexo-theme-huxblog/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/hexo-theme-huxblog/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/hexo-theme-huxblog/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

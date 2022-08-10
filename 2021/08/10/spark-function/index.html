@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/hexo-theme-huxblog/img/favicon.ico">
+
+    <title>
+        
+          spark基础算子总结 - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/2021/08/10/spark-function/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/hexo-theme-huxblog/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/hexo-theme-huxblog/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/about/">关于我</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/hexo-theme-huxblog/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#saprk" title="saprk">saprk</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#算子" title="算子">算子</a>
+                        
+                    </div>
+                    <h1>spark基础算子总结</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2021-08-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="Spark-单value算子"><a href="#Spark-单value算子" class="headerlink" title="Spark 单value算子"></a>Spark 单value算子</h2><h3 id="1-map算子（改变结构就用map）"><a href="#1-map算子（改变结构就用map）" class="headerlink" title="1. map算子（改变结构就用map）"></a>1. map算子（改变结构就用map）</h3><h4 id="先看map函数"><a href="#先看map函数" class="headerlink" title="先看map函数"></a>先看map函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"><span class="bullet">  * </span>Return a new RDD by applying a function to all elements of this RDD.</span><br><span class="line">  */</span><br><span class="line"> def map[<span class="string">U: ClassTag</span>](<span class="link">f: T =&gt; U</span>): RDD[U] = withScope &#123;</span><br><span class="line">   val cleanF = sc.clean(f)</span><br><span class="line">   new MapPartitionsRDD[<span class="string">U, T</span>](<span class="link">this, (context, pid, iter</span>) =&gt; iter.map(cleanF))</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明"><a href="#功能说明" class="headerlink" title="功能说明"></a>功能说明</h4><p>参数f是一个函数，它可以接收一个参数。当某个RDD执行map方法时，会遍历该RDD中的每一个数据项，并依次应用f函数，从而产生一个新的RDD。即，这个新RDD中的每一个元素都是原来RDD中每一个元素依次应用f函数而得到的。</p>
+<h4 id="代码演示"><a href="#代码演示" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">// 创建SparkConf</span></span><br><span class="line">    <span class="keyword">val</span> conf: SparkConf = <span class="keyword">new</span> SparkConf()</span><br><span class="line">    <span class="comment">// 创建SparkContext，该对象是提交Spark App的入口</span></span><br><span class="line">    <span class="keyword">val</span> sc: SparkContext = <span class="keyword">new</span> SparkContext(conf)</span><br><span class="line">    <span class="comment">// 参数（数据源，分区数(可选) ）</span></span><br><span class="line">    <span class="keyword">val</span> rdd: RDD[Int] = sc.makeRDD(<span class="number">1</span> <span class="keyword">to</span> <span class="number">4</span>,<span class="number">2</span>)</span><br><span class="line">    <span class="comment">// map操作 元素乘以2</span></span><br><span class="line">    <span class="keyword">val</span> mapRdd: RDD[Int] = rdd.map(_*<span class="number">2</span>) </span><br><span class="line">    mapRdd.collect().foreach(println)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">结果：</span><br><span class="line"><span class="number">2</span> </span><br><span class="line"><span class="number">4</span> </span><br><span class="line"><span class="number">6</span> </span><br><span class="line"><span class="number">8</span></span><br></pre></td></tr></table></figure>
+<h4 id="关于分区"><a href="#关于分区" class="headerlink" title="关于分区"></a>关于分区</h4><p><img src="1.png" alt="image.png"></p>
+<p>图片中的说明：<br>先把一个数据拿过来以后进行 <em>2 操作<br>例如拿1 过来后 </em>2 = 2 后，1这个数据就离开这块区域<br>然后进行第二个数据的处理…</p>
+<p>注意：map的分区数和RDD的分区数一致（看下面源码）</p>
+<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">def map[<span class="symbol">U</span>: <span class="symbol">ClassTag</span>](f: <span class="symbol">T</span> =&gt; <span class="symbol">U</span>): <span class="symbol">RDD</span>[<span class="symbol">U</span>] = withScope &#123;</span><br><span class="line">    val cleanF = sc.clean(f)</span><br><span class="line">    new <span class="symbol">MapPartitionsRDD</span>[<span class="symbol">U</span>, <span class="symbol">T</span>](this, (context, pid, iter) =&gt; iter.map(cleanF))</span><br><span class="line">  &#125;</span><br><span class="line">往下走</span><br><span class="line"> override def getPartitions: <span class="symbol">Array</span>[<span class="symbol">Partition</span>] = firstParent[<span class="symbol">T</span>].partitions</span><br><span class="line">再往下走firstParent</span><br><span class="line"><span class="comment">/** Returns the first parent RDD */</span></span><br><span class="line">  protected[spark] def firstParent[<span class="symbol">U</span>: <span class="symbol">ClassTag</span>]: <span class="symbol">RDD</span>[<span class="symbol">U</span>] = &#123;</span><br><span class="line">    dependencies.head.rdd.asInstanceOf[<span class="symbol">RDD</span>[<span class="symbol">U</span>]]</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">主要的是：firstParent[<span class="symbol">T</span>].partitions 这里</span><br></pre></td></tr></table></figure>
+<h3 id="2-mapPartitions-以分区为单位执行Map"><a href="#2-mapPartitions-以分区为单位执行Map" class="headerlink" title="2. mapPartitions() 以分区为单位执行Map"></a>2. mapPartitions() 以分区为单位执行Map</h3><h4 id="先看mapPartitions函数"><a href="#先看mapPartitions函数" class="headerlink" title="先看mapPartitions函数"></a>先看mapPartitions函数</h4><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def mapPartitions[U: ClassTag](</span><br><span class="line">      f: <span class="built_in">Iterator</span>[T] =&gt; <span class="built_in">Iterator</span>[U],</span><br><span class="line">      preservesPartitioning: Boolean = <span class="keyword">false</span>): RDD[U] = withScope &#123;</span><br><span class="line">    val cleanedF = sc.clean(f)</span><br><span class="line">    <span class="keyword">new</span> MapPartitionsRDD(</span><br><span class="line">      <span class="keyword">this</span>,</span><br><span class="line">      (context: TaskContext, index: Int, iter: <span class="built_in">Iterator</span>[T]) =&gt; cleanedF(iter),</span><br><span class="line">      preservesPartitioning)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-1"><a href="#功能说明-1" class="headerlink" title="功能说明"></a>功能说明</h4><p>f: Iterator[T] =&gt; Iterator[U]：f函数把每个分区的数据分别放入到迭代器中（批处理）</p>
+<p>preservesPartitioning: Boolean = false ：是否保留RDD的分区信息</p>
+<p>功能：一次处理一个分区数据</p>
+<h4 id="代码演示-1"><a href="#代码演示-1" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    <span class="string">//</span> <span class="string">前面代码省略，直接从数据源开始</span></span><br><span class="line">    <span class="attr">val rdd:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">sc.makeRDD(1</span> <span class="string">to</span> <span class="number">4</span><span class="string">，2)</span></span><br><span class="line">    <span class="string">val</span> <span class="string">mapRdd</span> <span class="string">=</span> <span class="string">rdd.mapPartitions(_.map(_*2))</span></span><br><span class="line">    <span class="string">mapRdd.collect().foreach(println)</span></span><br><span class="line"></span><br><span class="line"><span class="string">结果：</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">4</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"><span class="number">8</span></span><br></pre></td></tr></table></figure>
+<h4 id="关于分区-1"><a href="#关于分区-1" class="headerlink" title="关于分区"></a>关于分区</h4><p><img src="2.png" alt="image.png"></p>
+<p>分区说明<br>每一个分区的数据会先到内存空间，然后才进行逻辑操作，整个分区操作完之后，拿到分区的数据才会释放掉。<br>从性能方面讲：批处理效率高<br>从内存方面：需要内存空间较大</p>
+<h3 id="3-mapPartitionsWithIndex-带分区号"><a href="#3-mapPartitionsWithIndex-带分区号" class="headerlink" title="3. mapPartitionsWithIndex()带分区号"></a>3. mapPartitionsWithIndex()带分区号</h3><h4 id="先看mapPartitionsWithIndex函数"><a href="#先看mapPartitionsWithIndex函数" class="headerlink" title="先看mapPartitionsWithIndex函数"></a>先看mapPartitionsWithIndex函数</h4><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">def</span> <span class="selector-tag">mapPartitionsWithIndex</span><span class="selector-attr">[U: ClassTag]</span>(</span><br><span class="line">      <span class="comment">// Int表示分区编号</span></span><br><span class="line">      <span class="attribute">f</span>: (Int, Iterator[T]) =&gt; Iterator[U], </span><br><span class="line">      <span class="attribute">preservesPartitioning</span>: Boolean = false): <span class="selector-tag">RDD</span><span class="selector-attr">[U]</span></span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-2"><a href="#功能说明-2" class="headerlink" title="功能说明"></a>功能说明</h4><p>f: (Int, Iterator[T]) =&gt; Iterator[U]：f函数把每个分区的数据分别放入到迭代器中（批处理）并且加上分区号</p>
+<p>preservesPartitioning: Boolean = false ：是否保留RDD的分区信息</p>
+<p>功能：比mapPartitions多一个整数参数表示分区号</p>
+<h4 id="代码演示-2"><a href="#代码演示-2" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">    val rdd: RDD[Int] = sc.makeRDD(<span class="number">1</span> <span class="keyword">to</span> <span class="number">4</span>, <span class="number">2</span>)</span><br><span class="line">    val mapRdd = rdd.mapPartitionsWithIndex((<span class="built_in">index</span>, <span class="built_in">items</span>) =&gt; &#123;</span><br><span class="line">      <span class="built_in">items</span>.<span class="keyword">map</span>((<span class="built_in">index</span>, _))</span><br><span class="line">    &#125;)</span><br><span class="line">    // 打印修改后的RDD中数据</span><br><span class="line">     mapRdd.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果：</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="number">0</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="number">1</span>,<span class="number">3</span>)</span><br><span class="line">(<span class="number">1</span>,<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="4-flatMap-扁平化"><a href="#4-flatMap-扁平化" class="headerlink" title="4. flatMap()扁平化"></a>4. flatMap()扁平化</h3><h4 id="先看flatMap函数"><a href="#先看flatMap函数" class="headerlink" title="先看flatMap函数"></a>先看flatMap函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def flatMap[<span class="string">U: ClassTag</span>](<span class="link">f: T =&gt; TraversableOnce[U]</span>): RDD[U] = withScope &#123;</span><br><span class="line"><span class="code">    val cleanF = sc.clean(f)</span></span><br><span class="line"><span class="code">    new MapPartitionsRDD[U, T](this, (context, pid, iter) =&gt; iter.flatMap(cleanF))</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-3"><a href="#功能说明-3" class="headerlink" title="功能说明"></a>功能说明</h4><p><img src="3.png" alt="image.png"></p>
+<p>与map操作类似，将RDD中的每一个元素通过应用f函数依次转换为新的元素，并封装到RDD中。</p>
+<p>区别：在flatMap操作中，f函数的返回值是一个集合，并且会将每一个该集合中的元素拆分出来放到新的RDD中。</p>
+<h4 id="代码演示-3"><a href="#代码演示-3" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">	<span class="string">val</span> <span class="string">listRDD=sc.makeRDD(List(List(1,2),List(3,4),List(5,6),List(7)),</span> <span class="number">2</span><span class="string">)</span></span><br><span class="line">    <span class="attr">val mapRdd:</span> <span class="string">RDD[Int]=</span> <span class="string">listRDD.flatMap(item=&gt;item)</span></span><br><span class="line"></span><br><span class="line">    <span class="string">//</span> <span class="string">打印修改后的RDD中数据</span></span><br><span class="line">     <span class="string">mapRdd.collect().foreach(println)</span></span><br><span class="line"></span><br><span class="line"><span class="string">结果：</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">4</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"><span class="number">7</span></span><br></pre></td></tr></table></figure>
+<h3 id="5-glom-分区转换数组"><a href="#5-glom-分区转换数组" class="headerlink" title="5. glom()分区转换数组"></a>5. glom()分区转换数组</h3><h4 id="先看glom函数"><a href="#先看glom函数" class="headerlink" title="先看glom函数"></a>先看glom函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def glom(): RDD[Array[T]] = withScope &#123;</span><br><span class="line">   new MapPartitionsRDD[<span class="string">Array[T</span>], T](this, (context, pid, iter) =&gt; Iterator(iter.toArray))</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-4"><a href="#功能说明-4" class="headerlink" title="功能说明"></a>功能说明</h4><p>该操作将RDD中每一个分区变成一个数组，并放置在新的RDD中，数组中元素的类型与原分区中元素类型一致。<br><img src="4.png" alt="image.png"></p>
+<h4 id="代码演示（求两个分区中的最大值）"><a href="#代码演示（求两个分区中的最大值）" class="headerlink" title="代码演示（求两个分区中的最大值）"></a>代码演示（求两个分区中的最大值）</h4><figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">val</span> sc: SparkContext = <span class="keyword">new</span> SparkContext(conf)</span><br><span class="line">    <span class="keyword">val</span> rdd = sc.makeRDD(<span class="number">1</span> <span class="keyword">to</span> <span class="number">4</span>, <span class="number">2</span>)</span><br><span class="line">    <span class="keyword">val</span> mapRdd = rdd.glom().map(_.max)</span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">     mapRdd.collect().foreach(println)</span><br><span class="line">     </span><br><span class="line">结果：</span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">4</span></span><br></pre></td></tr></table></figure>
+<h3 id="6-groupBy-分组"><a href="#6-groupBy-分组" class="headerlink" title="6. groupBy()分组"></a>6. groupBy()分组</h3><h4 id="先看groupBy函数"><a href="#先看groupBy函数" class="headerlink" title="先看groupBy函数"></a>先看groupBy函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def groupBy[<span class="string">K</span>](<span class="link">f: T =&gt; K</span>)(implicit kt: ClassTag[K]): RDD[(K, Iterable[T])] = withScope &#123;</span><br><span class="line"><span class="code">    groupBy[K](f, defaultPartitioner(this))</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-5"><a href="#功能说明-5" class="headerlink" title="功能说明"></a>功能说明</h4><p>分组，按照传入函数的返回值进行分组。将相同的key对应的值放入一个迭代器。<br><img src="5.png" alt="image.png"></p>
+<h4 id="代码演示-（按照元素模以2的值进行分组）"><a href="#代码演示-（按照元素模以2的值进行分组）" class="headerlink" title="代码演示 （按照元素模以2的值进行分组）"></a>代码演示 （按照元素模以2的值进行分组）</h4><figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    val rdd = sc.makeRDD<span class="comment">(1 to 4,2)</span></span><br><span class="line">    val mapRdd: RDD[<span class="comment">(Int, Iterable[Int])</span>] = rdd.groupBy<span class="comment">(_ % 2)</span></span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">    mapRdd.collect<span class="comment">()</span>.foreach<span class="comment">(println)</span></span><br><span class="line"></span><br><span class="line">结果：</span><br><span class="line"><span class="comment">(0,CompactBuffer(2, 4)</span>)</span><br><span class="line"><span class="comment">(1,CompactBuffer(1, 3)</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="7-sample-采样"><a href="#7-sample-采样" class="headerlink" title="7. sample()采样"></a>7. sample()采样</h3><h4 id="先看sample函数"><a href="#先看sample函数" class="headerlink" title="先看sample函数"></a>先看sample函数</h4><figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">def</span> <span class="selector-tag">sample</span>(</span><br><span class="line">      <span class="attribute">withReplacement</span>: Boolean,</span><br><span class="line">      <span class="attribute">fraction</span>: Double,</span><br><span class="line">      <span class="attribute">seed</span>: Long = Utils.random.nextLong): <span class="selector-tag">RDD</span><span class="selector-attr">[T]</span></span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-6"><a href="#功能说明-6" class="headerlink" title="功能说明"></a>功能说明</h4><p>withReplacement： true为有放回的抽样，false为无放回的抽样。</p>
+<p>fraction表示：以指定的随机种子随机抽样出数量为fraction的数据。</p>
+<p>seed表示：指定随机数生成器种子。</p>
+<p>两个算法介绍：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">抽取数据不放回（伯努利算法）</span><br><span class="line">		<span class="keyword">val</span> sampleRDD: RDD[<span class="built_in">Int</span>] = dataRDD.sample(<span class="literal">false</span>, <span class="number">0.5</span>)</span><br><span class="line">       伯努利算法：又叫<span class="number">0</span>、<span class="number">1</span>分布。例如扔硬币，要么正面，要么反面。</span><br><span class="line">       具体实现：根据种子和随机算法算出一个数和第二个参数设置几率比较，小于第二个参数要，大于不要</span><br><span class="line">       第一个参数：抽取的数据是否放回，<span class="literal">false</span>：不放回</span><br><span class="line">       第二个参数：抽取的几率，范围在[<span class="number">0</span>,<span class="number">1</span>]之间,<span class="number">0</span>：全不取；<span class="number">1</span>：全取；</span><br><span class="line">       第三个参数：随机数种子</span><br><span class="line">抽取数据放回（泊松算法）</span><br><span class="line">		<span class="keyword">val</span> sampleRDD1: RDD[<span class="built_in">Int</span>] = dataRDD.sample(<span class="literal">true</span>, <span class="number">2</span>)</span><br><span class="line">		第一个参数：抽取的数据是否放回，<span class="literal">true</span>：放回；<span class="literal">false</span>：不放回</span><br><span class="line">       第二个参数：重复数据的几率，范围大于等于<span class="number">0</span>.表示每一个元素被期望抽取到的次数</span><br><span class="line">       第三个参数：随机数种子</span><br></pre></td></tr></table></figure>
+<h4 id="代码演示-4"><a href="#代码演示-4" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">	<span class="attr">val dataRDD:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">sc.makeRDD(List(1,2,3,4,5,6))</span></span><br><span class="line">    <span class="attr">val mapRdd:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">dataRDD.sample(false,</span> <span class="number">0.5</span><span class="string">)</span></span><br><span class="line">    <span class="string">//</span> <span class="string">打印修改后的RDD中数据</span></span><br><span class="line">     <span class="string">mapRdd.collect().foreach(println)</span></span><br><span class="line"></span><br><span class="line"><span class="string">结果：</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"></span><br><span class="line">	<span class="attr">val sc:</span> <span class="string">SparkContext</span> <span class="string">=</span> <span class="string">new</span> <span class="string">SparkContext(conf)</span></span><br><span class="line">    <span class="attr">val dataRDD:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">sc.makeRDD(List(1,2,3,4,5,6))</span></span><br><span class="line">    <span class="attr">val mapRdd:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">dataRDD.sample(true,</span> <span class="number">2</span><span class="string">)</span></span><br><span class="line"></span><br><span class="line"><span class="string">结果：</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">4</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"><span class="number">6</span></span><br></pre></td></tr></table></figure>
+<h4 id="8-distinct-去重"><a href="#8-distinct-去重" class="headerlink" title="8. distinct()去重"></a>8. distinct()去重</h4><h4 id="先看distinct函数"><a href="#先看distinct函数" class="headerlink" title="先看distinct函数"></a>先看distinct函数</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">def distinct(numPartitions: Int)(implicit ord: Ordering[T] = <span class="literal">null</span>): RDD[T] = withScope &#123;</span><br><span class="line">    map(<span class="function"><span class="params">x</span> =&gt;</span> <span class="function">(<span class="params">x, <span class="literal">null</span></span>)).<span class="params">reduceByKey</span>(<span class="params">(x, y</span>) =&gt;</span> x, numPartitions).map(_._1)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Return a new RDD containing the distinct elements in this RDD.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  def distinct(): RDD[T] = withScope &#123;</span><br><span class="line">    distinct(partitions.length)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-7"><a href="#功能说明-7" class="headerlink" title="功能说明"></a>功能说明</h4><p>对内部的元素去重，distinct后会生成与原RDD分区个数不一致的分区数。<br>上面的函数还可以对去重后的修改分区个数。</p>
+<h4 id="代码演示-5"><a href="#代码演示-5" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">	<span class="attr">val sc:</span> <span class="string">SparkContext</span> <span class="string">=</span> <span class="string">new</span> <span class="string">SparkContext(conf)</span></span><br><span class="line">    <span class="attr">val distinctRdd:</span> <span class="string">RDD[Int]</span> <span class="string">=</span> <span class="string">sc.makeRDD(List(1,2,1,5,2,9,6,1))</span></span><br><span class="line">    <span class="string">distinctRdd.distinct(2).collect().foreach(println)</span></span><br><span class="line"></span><br><span class="line"><span class="string">结果</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">9</span></span><br><span class="line"><span class="number">5</span></span><br></pre></td></tr></table></figure>
+<h4 id="distinct-实现的源码"><a href="#distinct-实现的源码" class="headerlink" title="distinct()实现的源码"></a>distinct()实现的源码</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def distinct(numPartitions: Int)(implicit ord: Ordering[T] = <span class="literal">null</span>): RDD[T] = withScope &#123;</span><br><span class="line">    map(<span class="function"><span class="params">x</span> =&gt;</span> <span class="function">(<span class="params">x, <span class="literal">null</span></span>)).<span class="params">reduceByKey</span>(<span class="params">(x, y</span>) =&gt;</span> x, numPartitions).map(_._1)</span><br><span class="line">  &#125;</span><br><span class="line">也就是这个玩意：</span><br><span class="line"> map(<span class="function"><span class="params">x</span> =&gt;</span> <span class="function">(<span class="params">x, <span class="literal">null</span></span>)).<span class="params">reduceByKey</span>(<span class="params">(x, y</span>) =&gt;</span> x, numPartitions).map(_._1)</span><br></pre></td></tr></table></figure>
+<h3 id="9-coalesce-合并分区"><a href="#9-coalesce-合并分区" class="headerlink" title="9. coalesce()合并分区"></a>9. coalesce()合并分区</h3><h4 id="先看coalesce函数"><a href="#先看coalesce函数" class="headerlink" title="先看coalesce函数"></a>先看coalesce函数</h4><figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def coalesce(numPartitions: <span class="built_in">Int</span>, shuffle: Boolean = false,</span><br><span class="line">               partitionCoalescer: Option[PartitionCoalescer] = Option.empty)</span><br><span class="line">              (<span class="keyword">implicit</span> ord: Ordering[T] = null)</span><br><span class="line">      : RDD[T]</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-8"><a href="#功能说明-8" class="headerlink" title="功能说明"></a>功能说明</h4><p>功能说明：缩减分区数，用于大数据集过滤后，提高小数据集的执行效率。</p>
+<p>默认false不执行shuffle。</p>
+<h4 id="代码演示-6"><a href="#代码演示-6" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[Int] = sc.makeRDD(Array(1,2,3,4),4)</span><br><span class="line">    val mapRdd: RDD[Int] = rdd.coalesce(2)</span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (<span class="keyword">index</span>,<span class="keyword">values</span>)=&gt;<span class="keyword">values</span>.<span class="keyword">map</span>((<span class="keyword">index</span>,_))</span><br><span class="line">    &#125;.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="number">0</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="number">1</span>,<span class="number">3</span>)</span><br><span class="line">(<span class="number">1</span>,<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="无shuffle"><a href="#无shuffle" class="headerlink" title="无shuffle"></a>无shuffle</h4><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">设置<span class="number">2</span>个分区后的结果：</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>) (<span class="number">0</span>,<span class="number">2</span>) (<span class="number">1</span>,<span class="number">3</span>) (<span class="number">1</span>,<span class="number">4</span>) </span><br><span class="line">设置<span class="number">3</span>个分区后的结果：</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>) (<span class="number">1</span>,<span class="number">2</span>) (<span class="number">2</span>,<span class="number">3</span>) (<span class="number">2</span>,<span class="number">4</span>) </span><br><span class="line">设置<span class="number">4</span>个或者以上</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>) (<span class="number">1</span>,<span class="number">2</span>) (<span class="number">2</span>,<span class="number">3</span>) (<span class="number">3</span>,<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="设置shuffle"><a href="#设置shuffle" class="headerlink" title="设置shuffle"></a>设置shuffle</h4><figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[<span class="keyword">Int</span>] = sc.makeRDD(<span class="keyword">Array</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>),<span class="number">4</span>)</span><br><span class="line">    val mapRdd: RDD[<span class="keyword">Int</span>] = rdd.coalesce(<span class="number">2</span>，<span class="keyword">true</span>)</span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (index,values)=&gt;values.map((index,_))</span><br><span class="line">    &#125;.collect().<span class="keyword">foreach</span>(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="number">0</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="number">0</span>,<span class="number">3</span>)</span><br><span class="line">(<span class="number">0</span>,<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">设置<span class="keyword">true</span>后开启shuffle</span><br><span class="line"> </span><br><span class="line">设置<span class="number">1</span> ,<span class="number">2</span>后的结果</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>) (<span class="number">0</span>,<span class="number">2</span>) (<span class="number">0</span>,<span class="number">3</span>) (<span class="number">0</span>,<span class="number">4</span>) </span><br><span class="line">设置<span class="number">3</span>后的结果</span><br><span class="line">(<span class="number">0</span>,<span class="number">1</span>) (<span class="number">1</span>,<span class="number">2</span>) (<span class="number">1</span>,<span class="number">3</span>) (<span class="number">2</span>,<span class="number">4</span>) </span><br><span class="line">设置<span class="number">4</span>后的结果</span><br><span class="line">(<span class="number">3</span>,<span class="number">1</span>) (<span class="number">3</span>,<span class="number">2</span>) (<span class="number">3</span>,<span class="number">3</span>) (<span class="number">3</span>,<span class="number">4</span>) </span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="built_in">i</span> &lt;- <span class="number">0</span> until maxPartitions) &#123;</span><br><span class="line">  val rangeStart = ((<span class="built_in">i</span>.toLong * prev.partitions.<span class="built_in">length</span>) / maxPartitions).toInt</span><br><span class="line">  val rangeEnd = (((<span class="built_in">i</span>.toLong + <span class="number">1</span>) * prev.partitions.<span class="built_in">length</span>) / maxPartitions).toInt</span><br><span class="line">  (rangeStart until rangeEnd).foreach&#123; <span class="built_in">j</span> =&gt; groupArr(<span class="built_in">i</span>).partitions += prev.partitions(<span class="built_in">j</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line">解释说明：</span><br><span class="line">    maxPartitions：传进来的新分区数</span><br><span class="line">    prev.partitions：之前RDD的分区数</span><br><span class="line"> </span><br><span class="line">分区<span class="built_in">i</span></span><br><span class="line">    开始 = 分区号*前一个分区数 / 新的分区数</span><br><span class="line">    结束 =( 分区号+<span class="number">1</span>)*前一个分区数 / 新的分区数</span><br></pre></td></tr></table></figure>
+<h3 id="10-repartition-重新分区（执行Shuffle）"><a href="#10-repartition-重新分区（执行Shuffle）" class="headerlink" title="10. repartition()重新分区（执行Shuffle）"></a>10. repartition()重新分区（执行Shuffle）</h3><h4 id="先看repartition函数"><a href="#先看repartition函数" class="headerlink" title="先看repartition函数"></a>先看repartition函数</h4><figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def repartition(numPartitions: <span class="built_in">Int</span>)(<span class="keyword">implicit</span> ord: Ordering[T] = null): RDD[T] = withScope &#123;</span><br><span class="line">    coalesce(numPartitions, shuffle = true)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-9"><a href="#功能说明-9" class="headerlink" title="功能说明"></a>功能说明</h4><p>该操作内部其实执行的是coalesce操作，参数shuffle的默认值为true。无论是将分区数多的RDD转换为分区数少的RDD，还是将分区数少的RDD转换为分区数多的RDD，repartition操作都可以完成，因为无论如何都会经shuffle过程。</p>
+<h4 id="代码演示-7"><a href="#代码演示-7" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[Int] = sc.makeRDD(Array(1,2,3,4,5,6,7,8),4)</span><br><span class="line">    val mapRdd: RDD[Int] = rdd.repartition(8)</span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (<span class="keyword">index</span>,<span class="keyword">values</span>) =&gt;<span class="keyword">values</span>.<span class="keyword">map</span>((<span class="keyword">index</span>,_))</span><br><span class="line">    &#125;.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">6</span>,<span class="number">1</span>)</span><br><span class="line">(<span class="number">6</span>,<span class="number">3</span>)</span><br><span class="line">(<span class="number">6</span>,<span class="number">5</span>)</span><br><span class="line">(<span class="number">6</span>,<span class="number">7</span>)</span><br><span class="line">(<span class="number">7</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line">(<span class="number">7</span>,<span class="number">6</span>)</span><br><span class="line">(<span class="number">7</span>,<span class="number">8</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="coalesce和repartition对比与区别"><a href="#coalesce和repartition对比与区别" class="headerlink" title="coalesce和repartition对比与区别"></a>coalesce和repartition对比与区别</h4><p>（1）coalesce重新分区，可以选择是否进行shuffle过程。由参数shuffle: Boolean = false/true决定。</p>
+<p>（2）repartition实际上是调用的coalesce，进行shuffle。源码如下：<br>def repartition(numPartitions: Int)(implicit ord: Ordering[T] = null): RDD[T] = withScope {<br>coalesce(numPartitions, shuffle = true)<br>}</p>
+<p>（3）coalesce一般为缩减分区，如果扩大分区，也不会增加分区总数，意义不大。</p>
+<p>（4）repartition扩大分区执行shuffle，可以达到扩大分区的效果。</p>
+<h4 id="11-sortBy-排序"><a href="#11-sortBy-排序" class="headerlink" title="11. sortBy()排序"></a>11. sortBy()排序</h4><h4 id="先看sortBy函数"><a href="#先看sortBy函数" class="headerlink" title="先看sortBy函数"></a>先看sortBy函数</h4><figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def sortBy[K](</span><br><span class="line">      f: <span class="function"><span class="params">(T)</span> =&gt;</span> K,</span><br><span class="line">      ascending: Boolean = <span class="literal">true</span>,</span><br><span class="line">      numPartitions: Int = <span class="keyword">this</span>.partitions.length)</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-10"><a href="#功能说明-10" class="headerlink" title="功能说明"></a>功能说明</h4><p>该操作用于排序数据。在排序之前，可以将数据通过f函数进行处理，之后按照f函数处理的结果进行排序，默认为正序排列。排序后新产生的RDD的分区数与原RDD的分区数一致。</p>
+<h4 id="代码演示-8"><a href="#代码演示-8" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[<span class="keyword">Int</span>] = sc.makeRDD(<span class="keyword">Array</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">5</span>,<span class="number">3</span>,<span class="number">6</span>,<span class="number">2</span>))</span><br><span class="line">    val mapRdd = rdd.sortBy(item=&gt;item) <span class="comment">// 默认为true为正序，false为倒序</span></span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">    mapRdd.collect().<span class="keyword">foreach</span>(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line"><span class="number">5</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line"></span><br><span class="line">    val rdd: RDD[(<span class="keyword">Int</span>,<span class="keyword">Int</span>)] = sc.makeRDD(<span class="keyword">Array</span>((<span class="number">5</span>,<span class="number">2</span>),(<span class="number">5</span>,<span class="number">3</span>),(<span class="number">6</span>,<span class="number">2</span>)))</span><br><span class="line">    val mapRdd = rdd.sortBy(item=&gt;item) <span class="comment">// 默认为true为正序，false为倒序</span></span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">    mapRdd.collect().<span class="keyword">foreach</span>(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">5</span>,<span class="number">2</span>)</span><br><span class="line">(<span class="number">5</span>,<span class="number">3</span>)</span><br><span class="line">(<span class="number">6</span>,<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="Spark-key-value类型算子总结-图解和源码"><a href="#Spark-key-value类型算子总结-图解和源码" class="headerlink" title="Spark key-value类型算子总结(图解和源码)"></a>Spark key-value类型算子总结(图解和源码)</h2><h3 id="1-partitionBy-按照K重新分区"><a href="#1-partitionBy-按照K重新分区" class="headerlink" title="1. partitionBy()按照K重新分区"></a>1. partitionBy()按照K重新分区</h3><h4 id="先看partitionBy函数"><a href="#先看partitionBy函数" class="headerlink" title="先看partitionBy函数"></a>先看partitionBy函数</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">partitionBy</span><span class="params">(<span class="symbol">partitioner:</span> Partitioner)</span></span>: RDD[(K, V)] = <span class="keyword">self</span>.withScope &#123;</span><br><span class="line">   <span class="keyword">if</span> (keyClass.isArray &amp;&amp; partitioner.isInstanceOf[HashPartitioner]) &#123;</span><br><span class="line">     throw new SparkException(<span class="string">"HashPartitioner cannot partition array keys."</span>)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> (<span class="keyword">self</span>.partitioner == Some(partitioner)) &#123;</span><br><span class="line">     <span class="keyword">self</span></span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     new ShuffledRDD[K, V, V](<span class="keyword">self</span>, partitioner)</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-11"><a href="#功能说明-11" class="headerlink" title="功能说明"></a>功能说明</h4><p>将RDD[K,V]中的K按照指定Partitioner重新进行分区。</p>
+<p>如果原有的RDD和新的RDD是一致的话就不进行分区，否则会产生Shuffle过程。</p>
+<p><img src="6.png" alt="image.png"></p>
+<h4 id="代码演示（按HashPartitioner分区）"><a href="#代码演示（按HashPartitioner分区）" class="headerlink" title="代码演示（按HashPartitioner分区）"></a>代码演示（按HashPartitioner分区）</h4><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: <span class="type">RDD</span>[(<span class="keyword">Int</span>, <span class="keyword">String</span>)] = sc.makeRDD(<span class="keyword">Array</span>((<span class="number">1</span>,<span class="string">"aaa"</span>),(<span class="number">2</span>,<span class="string">"bbb"</span>),(<span class="number">3</span>,<span class="string">"ccc"</span>)),<span class="number">3</span>)</span><br><span class="line">    val mapRdd: <span class="type">RDD</span>[(<span class="keyword">Int</span>, <span class="keyword">String</span>)] = rdd.partitionBy(<span class="keyword">new</span> <span class="type">org</span>.apache.spark.HashPartitioner(<span class="number">2</span>))</span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (index,values)=&gt;values.map((index,<span class="literal">_</span>))</span><br><span class="line">    &#125;.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">0</span>,(<span class="number">2</span>,bbb))</span><br><span class="line">(<span class="number">1</span>,(<span class="number">1</span>,aaa))</span><br><span class="line">(<span class="number">1</span>,(<span class="number">3</span>,ccc))</span><br></pre></td></tr></table></figure>
+<h4 id="自定义分区规则"><a href="#自定义分区规则" class="headerlink" title="自定义分区规则"></a>自定义分区规则</h4><p>要实现自定义分区器，需要继承org.apache.spark.Partitioner类，并实现下面三个方法。</p>
+<p>（1）numPartitions: Int:返回创建出来的分区数。</p>
+<p>（2）getPartition(key: Any):</p>
+<p>Int:返回给定键的分区编号(0到numPartitions-1)。</p>
+<p>（3）equals():Java 判断相等性的标准方法。这个方法的实现非常重要，Spark需要用这个方法来检查你的分区器对象是否和其他分区器实例相同，这样Spark才可以判断两个RDD的分区方式是否相同。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main方法</span></span><br><span class="line">	<span class="keyword">val</span> rdd: <span class="type">RDD</span>[(<span class="type">Int</span>, <span class="type">String</span>)] = sc.makeRDD(<span class="type">Array</span>((<span class="number">1</span>,<span class="string">"aaa"</span>),(<span class="number">2</span>,<span class="string">"bbb"</span>),(<span class="number">3</span>,<span class="string">"ccc"</span>)),<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">val</span> mapRdd: <span class="type">RDD</span>[(<span class="type">Int</span>, <span class="type">String</span>)] = rdd.partitionBy(<span class="keyword">new</span> <span class="type">MyPartition</span>(<span class="number">2</span>))</span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (index,values)=&gt;values.map((index,_))</span><br><span class="line">    &#125;.collect().foreach(println)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 主要代码</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyPartition</span>(<span class="params">num:<span class="type">Int</span></span>) <span class="keyword">extends</span> <span class="title">Partitioner</span></span>&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">numPartitions</span></span>: <span class="type">Int</span> = num</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">getPartition</span></span>(key: <span class="type">Any</span>): <span class="type">Int</span> = &#123;</span><br><span class="line">      <span class="keyword">if</span>(key.isInstanceOf[<span class="type">Int</span>])&#123;</span><br><span class="line">        <span class="keyword">val</span> i: <span class="type">Int</span> = key.asInstanceOf[<span class="type">Int</span>]</span><br><span class="line">        <span class="keyword">if</span>(i%<span class="number">2</span>==<span class="number">0</span>)&#123;</span><br><span class="line">          <span class="number">0</span></span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">          <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="number">0</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">0</span>,(<span class="number">2</span>,bbb))</span><br><span class="line">(<span class="number">1</span>,(<span class="number">1</span>,aaa))</span><br><span class="line">(<span class="number">1</span>,(<span class="number">3</span>,ccc))</span><br></pre></td></tr></table></figure>
+<h3 id="2-reduceByKey-按照K聚合V"><a href="#2-reduceByKey-按照K聚合V" class="headerlink" title="2. reduceByKey()按照K聚合V"></a>2. reduceByKey()按照K聚合V</h3><h4 id="先看reduceByKey函数"><a href="#先看reduceByKey函数" class="headerlink" title="先看reduceByKey函数"></a>先看reduceByKey函数</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def reduceByKey(<span class="function"><span class="keyword">func</span>: <span class="params">(V, V)</span></span> =&gt; <span class="type">V</span>): <span class="type">RDD</span>[(<span class="type">K</span>, <span class="type">V</span>)] = <span class="keyword">self</span>.withScope &#123;</span><br><span class="line">   reduceByKey(defaultPartitioner(<span class="keyword">self</span>), <span class="function"><span class="keyword">func</span>)</span></span><br><span class="line"><span class="function"> &#125;</span></span><br><span class="line"><span class="function"> </span></span><br><span class="line"><span class="function"><span class="title">def</span> <span class="title">reduceByKey</span><span class="params">(<span class="keyword">func</span>: <span class="params">(V, V)</span></span></span> =&gt; <span class="type">V</span>, numPartitions: <span class="type">Int</span>): <span class="type">RDD</span>[(<span class="type">K</span>, <span class="type">V</span>)]</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-12"><a href="#功能说明-12" class="headerlink" title="功能说明"></a>功能说明</h4><p>该操作可以将RDD[K,V]中的元素按照相同的K对V进行聚合。其存在多种重载形式，还可以设置新RDD的分区数。<br><img src="7.png" alt="image.png"></p>
+<h4 id="代码演示-9"><a href="#代码演示-9" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">	val rdd = sc.makeRDD(List((<span class="string">"a"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">5</span>),(<span class="string">"a"</span>,<span class="number">5</span>),(<span class="string">"b"</span>,<span class="number">2</span>)))</span><br><span class="line">    val mapRdd: RDD[<span class="function">(<span class="params"><span class="built_in">String</span>, Int</span>)] = <span class="params">rdd</span>.<span class="params">reduceByKey</span>(<span class="params">(<span class="params">v1,v2</span>)=&gt;v1+v2</span>)</span></span><br><span class="line"><span class="function">    // 打印修改后的<span class="params">RDD</span>中数据</span></span><br><span class="line"><span class="function">     <span class="params">mapRdd</span>.<span class="params">collect</span><span class="params">()</span>.<span class="params">foreach</span>(<span class="params">println</span>)</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">结果</span></span><br><span class="line"><span class="function">(<span class="params">a,6</span>)</span></span><br><span class="line"><span class="function">(<span class="params">b,7</span>)</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-groupByKey-按照K重新分组"><a href="#3-groupByKey-按照K重新分组" class="headerlink" title="3. groupByKey()按照K重新分组"></a>3. groupByKey()按照K重新分组</h3><h4 id="先看groupByKey函数"><a href="#先看groupByKey函数" class="headerlink" title="先看groupByKey函数"></a>先看groupByKey函数</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">groupByKey</span><span class="params">()</span></span>: RDD[(K, Iterable[V])]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">groupByKey</span><span class="params">(<span class="symbol">numPartitions:</span> Int)</span></span>: RDD[(K, Iterable[V])] = <span class="keyword">self</span>.withScope &#123;</span><br><span class="line">    groupByKey(new HashPartitioner(numPartitions))</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-13"><a href="#功能说明-13" class="headerlink" title="功能说明"></a>功能说明</h4><p>groupByKey对每个key进行操作，但只生成一个seq，并不进行聚合。<br>该操作可以指定分区器或者分区数（默认使用HashPartitioner）。<br><img src="8.png" alt="image.png"></p>
+<h4 id="代码演示-10"><a href="#代码演示-10" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> 	val rdd = sc.makeRDD(<span class="built_in">List</span>((<span class="string">"a"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">5</span>),(<span class="string">"a"</span>,<span class="number">5</span>),(<span class="string">"b"</span>,<span class="number">2</span>)))</span><br><span class="line">    val mapRdd: RDD[(<span class="built_in">String</span>, <span class="built_in">Iterable</span>[Int])] = rdd.groupByKey(<span class="number">2</span>)</span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">    mapRdd.mapPartitionsWithIndex&#123;</span><br><span class="line">      (index,values)=&gt;values.map((index,_))</span><br><span class="line">    &#125;.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">0</span>,(b,CompactBuffer(<span class="number">5</span>, <span class="number">2</span>)))</span><br><span class="line">(<span class="number">1</span>,(a,CompactBuffer(<span class="number">1</span>, <span class="number">5</span>)))</span><br></pre></td></tr></table></figure>
+<h3 id="4-aggregateByKey-按照K处理分区内和分区间逻辑"><a href="#4-aggregateByKey-按照K处理分区内和分区间逻辑" class="headerlink" title="4. aggregateByKey()按照K处理分区内和分区间逻辑"></a>4. aggregateByKey()按照K处理分区内和分区间逻辑</h3><h4 id="先看aggregateByKey函数"><a href="#先看aggregateByKey函数" class="headerlink" title="先看aggregateByKey函数"></a>先看aggregateByKey函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def aggregateByKey[<span class="string">U: ClassTag</span>](<span class="link">zeroValue: U</span>)(seqOp: (U, V) =&gt; U,</span><br><span class="line"><span class="code">      combOp: (U, U) =&gt; U): RDD[(K, U)] = self.withScope &#123;</span></span><br><span class="line"><span class="code">    aggregateByKey(zeroValue, defaultPartitioner(self))(seqOp, combOp)</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-14"><a href="#功能说明-14" class="headerlink" title="功能说明"></a>功能说明</h4><p>1）zeroValue（初始值）：给每一个分区中的每一种key一个初始值。</p>
+<p>这个初始值的理解：</p>
+<p>如何求最大值，所有的值为正数，设置为0，</p>
+<p>如果有负值，设置为 负无穷，</p>
+<p>这个初始值就是与第一个值进行比较，保证第一次对比下去。</p>
+<p>（2）seqOp（分区内）：函数用于在每一个分区中用初始值逐步迭代value。</p>
+<p>（3）combOp（分区间）：函数用于合并每个分区中的结果。<br><img src="9.png" alt="image.png"></p>
+<h4 id="代码演示-11"><a href="#代码演示-11" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">	val sc: <span class="type">SparkContext </span>= <span class="keyword">new</span> <span class="type">SparkContext</span>(conf)</span><br><span class="line">    val rdd: <span class="type">RDD</span>[(<span class="keyword">String</span>, <span class="keyword">Int</span>)] = sc.makeRDD(List((<span class="string">"a"</span>, <span class="number">3</span>), (<span class="string">"a"</span>, <span class="number">2</span>), (<span class="string">"c"</span>, <span class="number">4</span>), (<span class="string">"b"</span>, <span class="number">3</span>), (<span class="string">"c"</span>, <span class="number">6</span>), (<span class="string">"c"</span>, <span class="number">8</span>)), <span class="number">2</span>)</span><br><span class="line">    val mapRdd: <span class="type">RDD</span>[(<span class="keyword">String</span>, <span class="keyword">Int</span>)] = rdd.aggregateByKey(<span class="number">0</span>)(math.max(<span class="literal">_</span>,<span class="literal">_</span>),<span class="literal">_</span>+<span class="literal">_</span>)</span><br><span class="line">    </span><br><span class="line">结果</span><br><span class="line">(b,<span class="number">3</span>)</span><br><span class="line">(a,<span class="number">3</span>)</span><br><span class="line">(c,<span class="number">12</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="5-foldByKey-分区内和分区间相同的aggregateByKey"><a href="#5-foldByKey-分区内和分区间相同的aggregateByKey" class="headerlink" title="5. foldByKey()分区内和分区间相同的aggregateByKey()"></a>5. foldByKey()分区内和分区间相同的aggregateByKey()</h3><h4 id="先看foldByKey函数"><a href="#先看foldByKey函数" class="headerlink" title="先看foldByKey函数"></a>先看foldByKey函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def aggregateByKey[<span class="string">U: ClassTag</span>](<span class="link">zeroValue: U</span>)(seqOp: (U, V) =&gt; U,</span><br><span class="line"><span class="code">      combOp: (U, U) =&gt; U): RDD[(K, U)] = self.withScope &#123;</span></span><br><span class="line"><span class="code">    aggregateByKey(zeroValue, defaultPartitioner(self))(seqOp, combOp)</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-15"><a href="#功能说明-15" class="headerlink" title="功能说明"></a>功能说明</h4><p>参数zeroValue：是一个初始化值，它可以是任意类型。</p>
+<p>参数func：是一个函数，两个输入参数相同。<br><img src="10.png" alt="image.png"></p>
+<h4 id="代码演示-12"><a href="#代码演示-12" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    val <span class="type">list</span> = List((<span class="string">"a"</span>,<span class="number">1</span>),(<span class="string">"a"</span>,<span class="number">1</span>),(<span class="string">"a"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">1</span>),(<span class="string">"b"</span>,<span class="number">1</span>),(<span class="string">"a"</span>,<span class="number">1</span>))</span><br><span class="line">    val rdd = sc.makeRDD(<span class="type">list</span>,<span class="number">2</span>)</span><br><span class="line">    rdd.foldByKey(<span class="number">0</span>)(_+_).collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(b,<span class="number">4</span>)</span><br><span class="line">(a,<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="6-combineByKey-转换结构后分区内和分区间操作"><a href="#6-combineByKey-转换结构后分区内和分区间操作" class="headerlink" title="6. combineByKey()转换结构后分区内和分区间操作"></a>6. combineByKey()转换结构后分区内和分区间操作</h3><h4 id="先看combineByKey函数"><a href="#先看combineByKey函数" class="headerlink" title="先看combineByKey函数"></a>先看combineByKey函数</h4><figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">def combineByKey[C](</span><br><span class="line">      createCombiner: V =&gt; C,</span><br><span class="line">      mergeValue: <span class="function"><span class="params">(C, V)</span> =&gt;</span> C,</span><br><span class="line">      mergeCombiners: <span class="function"><span class="params">(C, C)</span> =&gt;</span> C): RDD[(K, C)] = self.withScope &#123;</span><br><span class="line">    combineByKeyWithClassTag(createCombiner, mergeValue, mergeCombiners)(<span class="literal">null</span>)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-16"><a href="#功能说明-16" class="headerlink" title="功能说明"></a>功能说明</h4><p>（1）createCombiner（转换数据的结构）: combineByKey()</p>
+<p>会遍历分区中的所有元素，因此每个元素的键要么还没有遇到过，要么就和之前的某个元素的键相同。如果这是一个新的元素，combineByKey()会使用一个叫作createCombiner()的函数来创建那个键对应的累加器的初始值。</p>
+<p>（2）mergeValue（分区内）:</p>
+<p>如果这是一个在处理当前分区之前已经遇到的键，它会使用mergeValue()方法将该键的累加器对应的当前值与这个新的值进行合并。</p>
+<p>（3）mergeCombiners（分区间）:</p>
+<p>由于每个分区都是独立处理的，因此对于同一个键可以有多个累加器。如果有两个或者更多的分区都有对应同一个键的累加器，就需要使用用户提供的 mergeCombiners()方法将各个分区的结果进行合并。</p>
+<p>针对相同K，将V合并成一个集合</p>
+<h4 id="代码演示（计算每个key出现的次数以及可以对应值的总和，再相除得到结果）"><a href="#代码演示（计算每个key出现的次数以及可以对应值的总和，再相除得到结果）" class="headerlink" title="代码演示（计算每个key出现的次数以及可以对应值的总和，再相除得到结果）"></a>代码演示（计算每个key出现的次数以及可以对应值的总和，再相除得到结果）</h4><figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> 	val <span class="keyword">list</span>: <span class="keyword">List</span>[(String, <span class="keyword">Int</span>)] = <span class="keyword">List</span>((<span class="string">"a"</span>, <span class="number">88</span>), (<span class="string">"b"</span>, <span class="number">95</span>), (<span class="string">"a"</span>, <span class="number">91</span>), (<span class="string">"b"</span>, <span class="number">93</span>), (<span class="string">"a"</span>, <span class="number">95</span>), (<span class="string">"b"</span>, <span class="number">98</span>))</span><br><span class="line">    val input: RDD[(String, <span class="keyword">Int</span>)] = sc.makeRDD(<span class="keyword">list</span>, <span class="number">2</span>)</span><br><span class="line">    input.combineByKey(</span><br><span class="line">      (_,<span class="number">1</span>),</span><br><span class="line">      (acc:(<span class="keyword">Int</span>,<span class="keyword">Int</span>),v)=&gt;(acc._1+v,acc._2+<span class="number">1</span>),</span><br><span class="line">      (acc1:(<span class="keyword">Int</span>,<span class="keyword">Int</span>),acc2:(<span class="keyword">Int</span>,<span class="keyword">Int</span>))=&gt;(acc1._1+acc2._1,acc1._2+acc2._2)</span><br><span class="line">    ).map(item=&gt;item._2._1/item._2._2.toDouble).collect().<span class="keyword">foreach</span>(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line"><span class="number">95.33333333333333</span></span><br><span class="line"><span class="number">91.33333333333333</span></span><br></pre></td></tr></table></figure>
+<h4 id="reduceByKey、foldByKey、aggregateByKey、combineByKey对比"><a href="#reduceByKey、foldByKey、aggregateByKey、combineByKey对比" class="headerlink" title="reduceByKey、foldByKey、aggregateByKey、combineByKey对比"></a>reduceByKey、foldByKey、aggregateByKey、combineByKey对比</h4><p>reduceByKey的底层源码</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def reduceByKey(partitioner: Partitioner, func: <span class="function"><span class="params">(V, V)</span> =&gt;</span> V): RDD[(K, V)] = self.withScope &#123;</span><br><span class="line">    combineByKeyWithClassTag[V](<span class="function"><span class="params">(v: V)</span> =&gt;</span> v, func, func, partitioner)</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line"> 第一个初始值不变，也即不用直接给出初始值，分区内和分区间的函数相同</span><br></pre></td></tr></table></figure>
+<p>foldByKey的底层源码</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">combineByKeyWithClassTag[<span class="string">V</span>](<span class="link">(v: V</span>) =&gt; </span><br><span class="line">cleanedFunc(createZero(), v),</span><br><span class="line">cleanedFunc, </span><br><span class="line">cleanedFunc, </span><br><span class="line">partitioner)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">初始值和分区内和分区间的函数（逻辑）相同</span><br></pre></td></tr></table></figure>
+<p>aggregateByKey的底层源码</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> combineByKeyWithClassTag[<span class="string">U</span>](<span class="link">(v: V</span>) =&gt; cleanedSeqOp(createZero(), v),</span><br><span class="line">cleanedSeqOp, </span><br><span class="line">combOp, </span><br><span class="line">partitioner)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">初始值和分区内处理逻辑一致</span><br><span class="line"></span><br><span class="line">分区内和分区间的函数（逻辑）不相同</span><br></pre></td></tr></table></figure>
+<p>combineByKey的底层源码</p>
+<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def combineByKeyWithClassTag[C](</span><br><span class="line">      createCombiner: V =&gt; C,</span><br><span class="line">      mergeValue: (C, V) =&gt; C,</span><br><span class="line">      mergeCombiners: (C, C) =&gt; C)(<span class="keyword">implicit</span> ct: ClassTag[C]): RDD[(K, C)] = self.withScope &#123;</span><br><span class="line">    combineByKeyWithClassTag(createCombiner, mergeValue, mergeCombiners, defaultPartitioner(self))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">把第<span class="number">1</span>个值变成特定的结构</span><br></pre></td></tr></table></figure>
+<h3 id="7-sortByKey-排序"><a href="#7-sortByKey-排序" class="headerlink" title="7. sortByKey()排序"></a>7. sortByKey()排序</h3><h4 id="先看sortByKey函数"><a href="#先看sortByKey函数" class="headerlink" title="先看sortByKey函数"></a>先看sortByKey函数</h4><figure class="highlight zephir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">def sortByKey(</span><br><span class="line">ascending: <span class="keyword">Boolean</span> = <span class="keyword">true</span>, </span><br><span class="line">numPartitions: <span class="keyword">Int</span> = <span class="keyword">self</span>.partitions.length)</span><br><span class="line">      : RDD[(K, V)] = <span class="keyword">self</span>.withScope</span><br><span class="line">  &#123;</span><br><span class="line">    val part = <span class="keyword">new</span> RangePartitioner(numPartitions, <span class="keyword">self</span>, ascending)</span><br><span class="line">    <span class="keyword">new</span> ShuffledRDD[K, V, V](<span class="keyword">self</span>, part)</span><br><span class="line">      .setKeyOrdering(<span class="keyword">if</span> (ascending) ordering <span class="keyword">else</span> ordering.reverse)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-17"><a href="#功能说明-17" class="headerlink" title="功能说明"></a>功能说明</h4><p>在一个(K,V)的RDD上调用，K必须实现Ordered接口，返回一个按照key进行排序的(K,V)的RDD</p>
+<p>ascending: Boolean = true 默认为升序</p>
+<p>false为降序</p>
+<h4 id="代码演示-13"><a href="#代码演示-13" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[<span class="comment">(Int, String)</span>] = sc.makeRDD<span class="comment">(Array((3,"aa")</span>,<span class="comment">(6,"cc")</span>,<span class="comment">(2,"bb")</span>,<span class="comment">(1,"dd")</span>))</span><br><span class="line">    val mapRdd: RDD[<span class="comment">(Int, String)</span>] = rdd.sortByKey<span class="comment">()</span></span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">     mapRdd.collect<span class="comment">()</span>.foreach<span class="comment">(println)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">(1,dd)</span></span><br><span class="line"><span class="comment">(2,bb)</span></span><br><span class="line"><span class="comment">(3,aa)</span></span><br><span class="line"><span class="comment">(6,cc)</span></span><br></pre></td></tr></table></figure>
+<h3 id="8-mapValues-只对V进行操作"><a href="#8-mapValues-只对V进行操作" class="headerlink" title="8. mapValues()只对V进行操作"></a>8. mapValues()只对V进行操作</h3><h4 id="先看mapValues函数"><a href="#先看mapValues函数" class="headerlink" title="先看mapValues函数"></a>先看mapValues函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">def mapValues[<span class="string">U</span>](<span class="link">f: V =&gt; U</span>): RDD[(K, U)] = self.withScope &#123;</span><br><span class="line"><span class="code">    val cleanF = self.context.clean(f)</span></span><br><span class="line"><span class="code">    new MapPartitionsRDD[(K, U), (K, V)](self,</span></span><br><span class="line"><span class="code">      (context, pid, iter) =&gt; iter.map &#123; case (k, v) =&gt; (k, cleanF(v)) &#125;,</span></span><br><span class="line"><span class="code">      preservesPartitioning = true)</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能与代码演示"><a href="#功能与代码演示" class="headerlink" title="功能与代码演示"></a>功能与代码演示</h4><p>针对于(K,V)形式的类型只对V进行操作</p>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: RDD[<span class="comment">(Int, String)</span>] = sc.makeRDD<span class="comment">(Array((1, "a")</span>, <span class="comment">(1, "d")</span>, <span class="comment">(2, "b")</span>, <span class="comment">(3, "c")</span>))</span><br><span class="line">    val mapRdd: RDD[<span class="comment">(Int, String)</span>] = rdd.mapValues<span class="comment">(_+"&gt;&gt;&gt;&gt;")</span></span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">     mapRdd.collect<span class="comment">()</span>.foreach<span class="comment">(println)</span></span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line"><span class="comment">(1,a&gt;&gt;&gt;&gt;)</span></span><br><span class="line"><span class="comment">(1,d&gt;&gt;&gt;&gt;)</span></span><br><span class="line"><span class="comment">(2,b&gt;&gt;&gt;&gt;)</span></span><br><span class="line"><span class="comment">(3,c&gt;&gt;&gt;&gt;)</span></span><br></pre></td></tr></table></figure>
+<h3 id="9-join-连接"><a href="#9-join-连接" class="headerlink" title="9. join()连接"></a>9. join()连接</h3><h4 id="先看join函数"><a href="#先看join函数" class="headerlink" title="先看join函数"></a>先看join函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def join[<span class="string">W</span>](<span class="link">other: RDD[(K, W</span>)]): RDD[(K, (V, W))] = self.withScope &#123;</span><br><span class="line"><span class="code">    join(other, defaultPartitioner(self, other))</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-18"><a href="#功能说明-18" class="headerlink" title="功能说明"></a>功能说明</h4><p>在类型为(K,V)和(K,W)的RDD上调用，返回一个相同key对应的所有元素对在一起的(K,(V,W))的RDD。<br><img src="11.png" alt="image.png"></p>
+<h4 id="代码演示-14"><a href="#代码演示-14" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">	val rdd: <span class="type">RDD</span>[(<span class="keyword">Int</span>, <span class="keyword">String</span>)] = sc.makeRDD(<span class="keyword">Array</span>((<span class="number">1</span>, <span class="string">"a"</span>), (<span class="number">2</span>, <span class="string">"b"</span>), (<span class="number">3</span>, <span class="string">"c"</span>)))</span><br><span class="line">    val rdd1: <span class="type">RDD</span>[(<span class="keyword">Int</span>, <span class="keyword">Int</span>)] = sc.makeRDD(<span class="keyword">Array</span>((<span class="number">1</span>, <span class="number">4</span>), (<span class="number">2</span>, <span class="number">5</span>), (<span class="number">4</span>, <span class="number">6</span>)))</span><br><span class="line">    val mapRdd: <span class="type">RDD</span>[(<span class="keyword">Int</span>, (<span class="keyword">String</span>, <span class="keyword">Int</span>))] = rdd.join(rdd1)</span><br><span class="line">    <span class="comment">// 打印修改后的RDD中数据</span></span><br><span class="line">     mapRdd.collect().foreach(println)</span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line">(<span class="number">1</span>,(a,<span class="number">4</span>))</span><br><span class="line">(<span class="number">2</span>,(b,<span class="number">5</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="10-cogroup-联合"><a href="#10-cogroup-联合" class="headerlink" title="10. cogroup()联合"></a>10. cogroup()联合</h3><h4 id="先看cogroup函数"><a href="#先看cogroup函数" class="headerlink" title="先看cogroup函数"></a>先看cogroup函数</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">def cogroup[<span class="string">W</span>](<span class="link">other: RDD[(K, W</span>)]): RDD[(K, (Iterable[V], Iterable[W]))] = self.withScope &#123;</span><br><span class="line"><span class="code">    cogroup(other, defaultPartitioner(self, other))</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="功能说明-19"><a href="#功能说明-19" class="headerlink" title="功能说明"></a>功能说明</h4><p>在类型为(K,V)和(K,W)的RDD上调用，返回一个(K,(Iterable,Iterable))类型的RDD。<br><img src="12.png" alt="image.png"></p>
+<h4 id="代码演示-15"><a href="#代码演示-15" class="headerlink" title="代码演示"></a>代码演示</h4><figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    val rdd: RDD[<span class="comment">(Int, String)</span>] = sc.makeRDD<span class="comment">(Array((1,"a")</span>,<span class="comment">(1,"b")</span>,<span class="comment">(3,"c")</span>))</span><br><span class="line">    val rdd<span class="number">1</span>: RDD[<span class="comment">(Int, Int)</span>] = sc.makeRDD<span class="comment">(Array((1,4)</span>,<span class="comment">(2,5)</span>,<span class="comment">(3,6)</span>))</span><br><span class="line">    rdd.cogroup<span class="comment">(rdd1)</span>.collect<span class="comment">()</span>.foreach<span class="comment">(println)</span></span><br><span class="line"></span><br><span class="line">结果</span><br><span class="line"><span class="comment">(1,(CompactBuffer(a, b)</span>,CompactBuffer<span class="comment">(4)</span>))</span><br><span class="line"><span class="comment">(2,(CompactBuffer()</span>,CompactBuffer<span class="comment">(5)</span>))</span><br><span class="line"><span class="comment">(3,(CompactBuffer(c)</span>,CompactBuffer<span class="comment">(6)</span>))</span><br></pre></td></tr></table></figure>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/hexo-theme-huxblog/2021/09/10/kubebuilder/" data-toggle="tooltip" data-placement="top" title="kubebuilder 初体验">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/hexo-theme-huxblog/2021/07/23/kubernetes-standalone/" data-toggle="tooltip" data-placement="top" title="kubernetes 单机安装">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/hexo-theme-huxblog/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#saprk" title="saprk">saprk</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#算子" title="算子">算子</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hexo-theme-huxblog";
+    var disqus_identifier = "http://kaijun.rocks/hexo-theme-huxblog/2021/08/10/spark-function/";
+    var disqus_url = "http://kaijun.rocks/hexo-theme-huxblog/2021/08/10/spark-function/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/Demonbane_x">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/demonbane.cn">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Kaijun">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/kaijun-chen-42089354">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2022 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/hexo-theme-huxblog/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/hexo-theme-huxblog/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/hexo-theme-huxblog/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

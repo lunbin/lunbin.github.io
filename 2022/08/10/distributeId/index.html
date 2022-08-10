@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/hexo-theme-huxblog/img/favicon.ico">
+
+    <title>
+        
+          分布式ID生成方案简介 - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/2022/08/10/distributeId/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/hexo-theme-huxblog/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/hexo-theme-huxblog/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/about/">关于我</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/hexo-theme-huxblog/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#分布式" title="分布式">分布式</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#方案" title="方案">方案</a>
+                        
+                    </div>
+                    <h1>分布式ID生成方案简介</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2022-08-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="分布式ID生成方案简介"><a href="#分布式ID生成方案简介" class="headerlink" title="分布式ID生成方案简介"></a>分布式ID生成方案简介</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><blockquote>
+<p>&emsp;&emsp;在复杂分布式系统中，往往需要对大量的数据和消息进行唯一标识。尤其现在大型的toc 的互联网公司，业务量大，数据日渐增长，对数据分库分表后需要有一个唯一ID来标识一条数据或消息，数据库的自增ID显然不能满足需求；此时一个能够生成全局唯一ID的系统是非常必要的。概括下来，分布式ID的要求有：</p>
+</blockquote>
+<ol>
+<li>全局唯一性：不能出现重复的ID号，既然是唯一标识，这是最基本的要求。</li>
+<li>趋势递增：在MySQL InnoDB引擎中使用的是聚集索引，由于多数RDBMS使用B+树的数据结构来存储索引数据，在主键的选择上面我们应该尽量使用有序的主键保证写入性能。</li>
+<li>单调递增：保证下一个ID一定大于上一个ID，例如事务版本号、IM增量消息、排序等特殊需求。</li>
+<li>信息安全：如果ID是连续的，恶意用户的扒取工作就非常容易做了，直接按照顺序下载指定URL即可；如果是那种订单号就更危险了，可以直接根据订单号知道一天的订单量。所以在一些应用场景下，需要ID无规则、不规则。  </li>
+</ol>
+<p>上述123对应三类不同的场景，3和4需求还是互斥的，无法使用同一个方案满足。同时， 除了对ID自身的要求，公司内部业务还对ID号生成系统的可用性要求极高， 很多业务都会去依赖id生成系统。</p>
+<h2 id="常用方法介绍"><a href="#常用方法介绍" class="headerlink" title="常用方法介绍"></a>常用方法介绍</h2><h3 id="UUID"><a href="#UUID" class="headerlink" title="UUID"></a>UUID</h3><p>​        UUID(Universally Unique Identifier)的标准型式包含32个16进制数字，以连字号分为五段，形式为8-4-4-4-12的36个字符，示例：<code>550e8400-e29b-41d4-a716-446655440000</code>，到目前为止业界一共有5种方式生成UUID，详情见IETF发布的UUID规范 <a href="http://www.ietf.org/rfc/rfc4122.txt" target="_blank" rel="noopener">A Universally Unique IDentifier (UUID) URN Namespace</a></p>
+<p>优点：</p>
+<ul>
+<li>性能非常高：本地生成，没有网络消耗。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li><p>不易于存储：UUID太长， 16字节128位，通常以36长度的字符串表示，很多场景不适用。</p>
+</li>
+<li><p>信息不安全：基于MAC地址生成UUID的算法可能会造成MAC地址泄露</p>
+</li>
+<li><p>ID作为主键时在特定的环境会存在一些问题，比如做DB主键的场景下，UUID就非常不适用：</p>
+<ol>
+<li>MySQL官方有明确的建议主键要尽量越短越好[4]，36个字符长度的UUID不符合要求。</li>
+</ol>
+<blockquote>
+<p>All indexes other than the clustered index are known as secondary indexes. In InnoDB, each record in a secondary index contains the primary key columns for the row, as well as the columns specified for the secondary index. InnoDB uses this primary key value to search for the row in the clustered index.<strong><em> If the primary key is long, the secondary indexes use more space, so it is advantageous to have a short primary key</em></strong>.</p>
+</blockquote>
+<ol start="2">
+<li>对MySQL索引不利：如果作为数据库主键，在InnoDB引擎下，UUID的无序性可能会引起数据位置频繁变动，严重影响性能。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h3 id="数据库ID自增"><a href="#数据库ID自增" class="headerlink" title="数据库ID自增"></a>数据库ID自增</h3><p>​        以MySQL举例，利用给字段设置<code>auto_increment_increment</code>和<code>auto_increment_offset</code>来保证ID自增，每次业务使用下列SQL读写MySQL得到ID号。</p>
+<p>这种方案的优缺点如下：</p>
+<blockquote>
+<p>优点：</p>
+</blockquote>
+<ul>
+<li>非常简单，利用现有数据库系统的功能实现，成本小，有DBA专业维护。</li>
+<li>ID号单调自增，可以实现一些对ID有特殊要求的业务。</li>
+</ul>
+<blockquote>
+<p> 缺点：</p>
+</blockquote>
+<ul>
+<li>强依赖DB，当DB异常时整个系统不可用，属于致命问题。配置主从复制可以尽可能的增加可用性，但是数据一致性在特殊情况下难以保证。主从切换时的不一致可能会导致重复发号。</li>
+<li>ID发号性能瓶颈限制在单台MySQL的读写性能。</li>
+</ul>
+<p>对于MySQL性能问题，可用如下方案解决：在分布式系统中我们可以多部署几台机器，每台机器设置不同的初始值，且步长和机器数相等。比如有两台机器。设置步长step为2，server1的初始值为1（1，3，5，7，9，11…）、server2的初始值为2（2，4，6，8，10…）。为了实现上述方案分别设置两台机器对应的参数，server1从1开始发号，server2从2开始发号，两台机器每次发号之后都递增2。</p>
+<p>假设我们要部署N台机器，步长需设置为N，每台的初始值依次为0,1,2…N-1那么整个架构就变成了如下图所示：</p>
+<p><img src="distributeId-1.png" alt></p>
+<p>这种架构貌似能够满足性能的需求，但有以下几个缺点：</p>
+<ul>
+<li>系统水平扩展比较困难，比如定义好了步长和机器台数之后，如果要添加机器该怎么做？假设现在只有一台机器发号是1,2,3,4,5（步长是1），这个时候需要扩容机器一台。可以这样做：把第二台机器的初始值设置得比第一台超过很多，比如14（假设在扩容时间之内第一台不可能发到14），同时设置步长为2，那么这台机器下发的号码都是14以后的偶数。然后摘掉第一台，把ID值保留为奇数，比如7，然后修改第一台的步长为2。让它符合我们定义的号段标准，对于这个例子来说就是让第一台以后只能产生奇数。扩容方案看起来复杂吗？貌似还好，现在想象一下如果我们线上有100台机器，这个时候要扩容该怎么做？简直是噩梦。所以系统水平扩展方案复杂难以实现。</li>
+<li>ID没有了单调递增的特性，只能趋势递增，这个缺点对于一般业务需求不是很重要，可以容忍。</li>
+<li>数据库压力还是很大，每次获取ID都得读写一次数据库，只能靠堆机器来提高性能。</li>
+</ul>
+<hr>
+<h3 id="snowflake方案"><a href="#snowflake方案" class="headerlink" title="snowflake方案"></a>snowflake方案</h3><p>​        SnowFlake 算法，是 Twitter 开源的分布式 id 生成算法。其核心思想就是：<strong>使用一个 64 bit 的 long 型的数字作为全局唯一 id</strong>。在分布式系统中的应用十分广泛，且ID 引入了时间戳，雪花算法基本上保持自增的。</p>
+<p><img src="distributeId-2.png" alt></p>
+<p>​        这 64 个 bit 中，其中 1 个 bit 是不用的，然后用其中的 41 bit 作为毫秒数，用 10 bit 作为工作机器 id，12 bit 作为序列号。举例如上图：</p>
+<ul>
+<li>第一个部分是 1 个 bit：0，     这个是无意义的。因为二进制里第一个 bit 位如果是 1，那么都是负数，但是我们生成的 id 都是正数，所以第一个 bit 统一都是 0。</li>
+<li>第二个部分是 41 个 bit：表示的是时间戳。单位是毫秒。41 bit 可以表示的数字多达 2^41 - 1，也就是可以标识 2 ^ 41 - 1 个毫秒值，换算成年就是表示<code>69</code>年的时间。</li>
+<li>第三个部分是 5  个 bit：表示的是机房 id     5 个 bit 代表机器 id。意思就是最多代表 2 ^ 5 个机房（32 个机房）</li>
+<li>第四个部分是 5  个 bit：表示的是机器 id。每个机房里可以代表 2 ^ 5 个机器（32 台机器），也可以根据自己公司的实际情况确定。</li>
+<li>第五个部分是 12 个 bit：表示的序号，就是某个机房某台机器上这<strong>一毫秒</strong>内同时生成的 id 的序号。12 bit 可以代表的最大正整数是 2 ^ 12 - 1 = 4096，也就是说可以用这个 12 bit 代表的数字来区分同一个毫秒内的 4096 个不同的 id。</li>
+</ul>
+<p>总结：简单来说，你的某个服务假设要生成一个全局唯一 id，那么就可以发送一个请求给部署了 SnowFlake 算法的系统，由这个 SnowFlake 算法系统来生成唯一 id。</p>
+<blockquote>
+<p>优点：</p>
+</blockquote>
+<ul>
+<li>毫秒数在高位，自增序列在低位，整个ID都是趋势递增的。</li>
+<li>不依赖数据库等第三方系统，以服务的方式部署，稳定性更高，生成ID的性能也是非常高的。</li>
+<li>可以根据自身业务特性分配bit位，非常灵活。</li>
+</ul>
+<blockquote>
+<p>缺点：</p>
+</blockquote>
+<ul>
+<li>依赖与系统时间的一致性，如果系统时间被回调，或者改变，可能会造成id冲突或者重复。</li>
+</ul>
+<hr>
+<h3 id="百度uid-generator"><a href="#百度uid-generator" class="headerlink" title="百度uid-generator"></a>百度uid-generator</h3><p>​        项目GitHub地址：<a href="https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和" target="_blank" rel="noopener">https://github.com/baidu/uid-generator，uid-generator是由百度技术部开发，基于Snowflake算法实现的，与原始的snowflake算法不同在于，uid-generator支持自定义时间戳、工作机器ID和</a> 序列号等各部分的位数，而且uid-generator中采用用户自定义workId的生成策略。</p>
+<p>​        uid-generator需要与数据库配合使用，需要新增一个WORKER_NODE表。当应用启动时会向数据库表中去插入一条数据，插入成功后返回的自增ID就是该机器的workId数据由host，port组成。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">--------+---------------+----------------+----------------+</span></span><br><span class="line">| sign   | delta seconds | worker_node_id |     sequence   |</span><br><span class="line">+<span class="comment">--------+---------------+----------------+----------------+</span></span><br><span class="line">   1bit	      28bit	           22bit	         13bit</span><br></pre></td></tr></table></figure>
+<p>由上图可知，UidGenerator的时间部分只有28位，这就意味着UidGenerator默认只能承受8.5年（2^28-1/86400/365）。当然，根据你业务的需求，UidGenerator可以适当调整delta seconds、worker node id和sequence占用位数。</p>
+<hr>
+<h3 id="Leaf-segment数据库方案"><a href="#Leaf-segment数据库方案" class="headerlink" title="Leaf-segment数据库方案"></a>Leaf-segment数据库方案</h3><p>​        该方案是使用数据库的方案上做了如下改变： - 原方案每次获取ID都得读写一次数据库，造成数据库压力大。改为利用proxy server批量获取，每次获取一个segment(step决定大小)号段的值。用完之后再去数据库获取新的号段，可以大大的减轻数据库的压力。 - 各个业务不同的发号需求用biz_tag字段来区分，每个biz-tag的ID获取相互隔离，互不影响。如果以后有性能需求需要对数据库扩容，不需要上述描述的复杂的扩容操作，只需要对biz_tag分库分表就行。</p>
+<p>数据库表设计如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">+<span class="comment">-------------+--------------+------+-----+-------------------+-----------------------------+</span></span><br><span class="line">| Field       | Type         | Null | Key | Default           | Extra                       |</span><br><span class="line">+<span class="comment">-------------+--------------+------+-----+-------------------+-----------------------------+</span></span><br><span class="line">| biz_tag     | varchar(128) | NO   | PRI |                   |                             |</span><br><span class="line">| max_id      | bigint(20)   | NO   |     | 1                 |                             |</span><br><span class="line">| step        | int(11)      | NO   |     | NULL              |                             |</span><br><span class="line">| desc        | varchar(256) | YES  |     | NULL              |                             |</span><br><span class="line">| update_time | timestamp    | NO   |     | CURRENT_TIMESTAMP | on <span class="keyword">update</span> <span class="keyword">CURRENT_TIMESTAMP</span> |</span><br><span class="line">+<span class="comment">-------------+--------------+------+-----+-------------------+-----------------------------+</span></span><br></pre></td></tr></table></figure>
+<p>重要字段说明：</p>
+<ul>
+<li><p>biz_tag: 用来区分业务</p>
+</li>
+<li><p>max_id: 表示该biz_tag目前所被分配的ID号段的最大值</p>
+</li>
+<li>step: 表示每次分配的号段长度。原来获取ID每次都需要写数据库，现在只需要把step设置得足够大，比如1000。那么只有当1000个号被消耗完了之后才会去重新读写一次数据库。读写数据库的频率从1减小到了1/step</li>
+</ul>
+<p>大致架构如下图所示：</p>
+<p><img src="distributeId-3.png" style="zoom:80%;"></p>
+<p>上面 test_tag在第一台Leaf机器上是1~1000的号段，当这个号段用完时，会去加载另一个长度为step=1000的号段，假设另外两台号段都没有更新，这个时候第一台机器新加载的号段就应该是3001~4000。同时数据库对应的biz_tag这条数据的max_id会从3000被更新成4000，更新号段的SQL语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Begin</span></span><br><span class="line"><span class="keyword">UPDATE</span> <span class="keyword">table</span> <span class="keyword">SET</span> max_id=max_id+step <span class="keyword">WHERE</span> biz_tag=xxx</span><br><span class="line"><span class="keyword">SELECT</span> tag, max_id, step <span class="keyword">FROM</span> <span class="keyword">table</span> <span class="keyword">WHERE</span> biz_tag=xxx</span><br><span class="line"><span class="keyword">Commit</span></span><br></pre></td></tr></table></figure>
+<p>这种模式有以下优缺点：</p>
+<blockquote>
+<p>优点：</p>
+</blockquote>
+<ul>
+<li>服务可以很方便的线性扩展，性能完全能够支撑大多数业务场景。</li>
+<li>ID号码是趋势递增的8byte的64位数字，满足上述数据库存储的主键要求。</li>
+<li>容灾性高：服务内部有号段缓存，即使DB宕机，短时间内Leaf仍能正常对外提供服务。</li>
+<li>可以自定义max_id的大小，非常方便业务从原有的ID方式上迁移过来。</li>
+</ul>
+<blockquote>
+<p>缺点：</p>
+</blockquote>
+<ul>
+<li>ID号码不够随机，能够泄露发号数量的信息，不太安全。</li>
+<li>当号段使用完之后还是会hang在更新数据库的I/O上</li>
+<li>DB宕机会造成整个系统不可用。</li>
+</ul>
+<p><strong>双buffer 优化</strong></p>
+<p>​        对于第二个缺点，Leaf-segment做了一些优化，简单的说就是：取号段的时机是在号段消耗完的时候进行的，也就意味着号段临界点的ID下发时间取决于下一次从DB取回号段的时间，并且在这期间进来的请求也会因为DB号段没有取回来，导致线程阻塞。如果请求DB的网络和DB的性能稳定，这种情况对系统的影响是不大的，但是假如取DB的时候网络发生抖动，或者DB发生慢查询就会导致整个系统的响应时间变慢。</p>
+<p>​        为此，我们希望DB取号段的过程能够做到无阻塞，不需要在DB取号段的时候阻塞请求线程，即当号段<strong>消费到某个点时</strong>就异步的把下一个号段加载到内存中。而不需要等到号段用尽的时候才去更新号段。这么做后基本可以解决第二个缺点。详细实现如下图所示：</p>
+<p><img src="distributeId-4.png" style="zoom:60%;"></p>
+<p>​        采用双buffer的方式，服务内部有两个号段缓存区segment。当前号段已下发10%时，如果下一个号段未更新，则另启一个更新线程去更新下一个号段。如果更新失败， 还有重试机制， 可以在号段下发20%时，再次另起一个更新线程去更新下一个号段。按照10%的比例， 可以重试10次。 当前号段全部下发完后，如果下个号段准备好了则切换到下个号段为当前segment接着下发，循环往复。每次请求来临时都会判断下个号段的状态，从而更新此号段，所以偶尔的网络抖动不会影响下个号段的更新。</p>
+<p><strong>DB高可用</strong></p>
+<p>​        针对第三个缺点（DB宕机会造成整个系统不可用）， 这个需要通过DB高可用分方式去解决了。一般使用主从模式， 或者集群模式。至于数据一致性的问题， 只要是在非极端情况下，出现的概率也是较低的。这块就不做过多的赘述了。</p>
+<hr>
+<h3 id="Leaf-snowflake方案"><a href="#Leaf-snowflake方案" class="headerlink" title="Leaf-snowflake方案"></a>Leaf-snowflake方案</h3><p>​        Leaf-segment方案可以生成趋势递增的ID，同时ID号是可计算的，不适用于订单ID生成场景，比如对在两天中午12点分别下单，通过订单id号相减就能大致计算出公司一天的订单量。</p>
+<p>​        Leaf-snowflake方案完全沿用snowflake方案的bit位设计，即是“1+41+10+12”的方式组装ID号。对于workerID的分配，当服务集群数量较小的情况下，完全可以手动配置。服务规模较大，动手配置成本太高。所以使用Zookeeper持久顺序节点的特性自动对snowflake节点配置wokerID。Leaf-snowflake是按照下面几个步骤启动的：</p>
+<ol>
+<li>启动Leaf-snowflake服务，连接Zookeeper，在leaf_forever父节点下检查自己是否已经注册过（是否有该顺序子节点）。</li>
+<li>如果有注册过直接取回自己的workerID（zk顺序节点生成的int类型ID号），启动服务。</li>
+<li>如果没有注册过，就在该父节点下面创建一个持久顺序节点，创建成功后取回顺序号当做自己的workerID号，启动服务。</li>
+</ol>
+<p><img src="distributeId-5.png" alt></p>
+<ul>
+<li>zookeeper弱依赖：除了从zookeeper上拿workerid以外， 也会在本机系统上缓存一个workerId文件， 当zookeeper集群出现问题， 恰好机器出现问题需要重启时，能保证服务能够正常启动。这样做到了对三方组件的弱依赖。</li>
+<li>时钟回调：具体流程如下：</li>
+</ul>
+<p><img src="distributeId-6.png" style="zoom:50%;"></p>
+<p>参见上图整个启动流程图，服务启动时首先检查自己是否写过ZooKeeper leaf_forever节点：</p>
+<ol>
+<li>若写过，则用自身系统时间与leaf_forever/${self}节点记录时间做比较，若小于leaf_forever/${self}时间则认为机器时间发生了大步长回拨，服务启动失败并报警。</li>
+<li>若未写过，证明是新服务节点，直接创建持久节点leaf_forever/${self}并写入自身系统时间，接下来综合对比其余Leaf节点的系统时间来判断自身系统时间是否准确，具体做法是取leaf_temporary下的所有临时节点(所有运行中的Leaf-snowflake节点)的服务IP：Port，然后通过RPC请求得到所有节点的系统时间，计算sum(time)/nodeSize。</li>
+<li>若abs( 系统时间-sum(time)/nodeSize ) &lt; 阈值，认为当前系统时间准确，正常启动服务，同时写临时节点leaf_temporary/${self} 维持session。</li>
+<li>否则认为本机系统时间发生大步长偏移，启动失败并报警。</li>
+<li>每隔一段时间(3s)上报自身系统时间写入leaf_forever/${self}。</li>
+</ol>
+<hr>
+<h3 id="TinyId"><a href="#TinyId" class="headerlink" title="TinyId"></a>TinyId</h3><p>​        Tinyid由滴滴开发，Github地址：<a href="https://github.com/didi/tinyid" target="_blank" rel="noopener">https://github.com/didi/tinyid</a></p>
+<p>​        Tinyid是一个ID生成器服务，它提供了REST API和Java客户端两种获取方式，如果使用Java客户端获取方式的话，官方宣称能单实例能达到1kw QPS（Over10 million QPSper single instance when using the java client.）</p>
+<p>​        Tinyid原理就是经典的segment模式，和美团的leaf原理几乎一致。原理图如下所示，以同一个bizType为例，每个tinyid-server会分配到不同的segment，例如第一个tinyid-server分配到(1000, 2000]，第二个tinyid-server分配到(2000, 3000]，第3个tinyid-server分配到(3000, 4000]：</p>
+<p><img src="distributeId-7.png" style="zoom:60%;"></p>
+<p>​        以第一个tinyid-server为例，当它的segment用了20%，即设定loadingId为20%的阈值，例如当前id是10000，步长为10000，那么loadingId=12000。那么当请求分布式ID分配到12001时（或者重启后），即超过loadingId，就会异步分配下一个segment(4000, 5000]，以此类推。</p>
+<hr>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/hexo-theme-huxblog/2022/08/10/graphql/" data-toggle="tooltip" data-placement="top" title="graphql 笔记">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/hexo-theme-huxblog/2021/10/10/data-mash/" data-toggle="tooltip" data-placement="top" title="data-mash">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/hexo-theme-huxblog/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#分布式" title="分布式">分布式</a>
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#方案" title="方案">方案</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hexo-theme-huxblog";
+    var disqus_identifier = "http://kaijun.rocks/hexo-theme-huxblog/2022/08/10/distributeId/";
+    var disqus_url = "http://kaijun.rocks/hexo-theme-huxblog/2022/08/10/distributeId/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/Demonbane_x">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/demonbane.cn">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Kaijun">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/kaijun-chen-42089354">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2022 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/hexo-theme-huxblog/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/hexo-theme-huxblog/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/hexo-theme-huxblog/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

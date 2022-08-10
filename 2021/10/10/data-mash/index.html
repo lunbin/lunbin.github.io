@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/hexo-theme-huxblog/img/favicon.ico">
+
+    <title>
+        
+          data-mash - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/2021/10/10/data-mash/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/hexo-theme-huxblog/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/hexo-theme-huxblog/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/hexo-theme-huxblog/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/about/">关于我</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/hexo-theme-huxblog/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/hexo-theme-huxblog/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#data mash" title="data mash">data mash</a>
+                        
+                    </div>
+                    <h1>data-mash</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2021-10-10
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Data-Mash"><a href="#Data-Mash" class="headerlink" title="Data Mash"></a>Data Mash</h1><ul>
+<li><em>Proposed by Toughtworks</em></li>
+<li><em>Origin: <a href="https://martinfowler.com/articles/data-monolith-to-mesh.html" target="_blank" rel="noopener">https://martinfowler.com/articles/data-monolith-to-mesh.html</a></em></li>
+</ul>
+<h2 id="当前企业数据架构"><a href="#当前企业数据架构" class="headerlink" title="当前企业数据架构"></a>当前企业数据架构</h2><p><strong>特征：集中式、单体、领域不可知</strong></p>
+<h3 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h3><ul>
+<li>第一代：企业数据仓库 + BI。代价昂贵，且存在巨大的技术债务，只有少部分人理解数据，导致在业务层面未能充分实现价值；</li>
+<li>第二代：数据湖。大数据生态过于复杂，长时间运行大量的 ETL 任务，且只有少部分专家能够熟悉并使用，期望值与实际收效不符；</li>
+<li>第三代：大致类似前两代，改进之处在于，1) 使用流计算实时处理数据，2) 流批一体，3) 拥抱云技术（存储、数据管道、机器学习）。第三代架构尝试解决数据实时处理问题，降低数据管理开销，但是很多特征注定会造成类似前两代的失败。</li>
+</ul>
+<p><strong>主要可以总结为，单体的灵活性和可扩展性较差，响应新需求（消费需求或者数据增加需求）都比较慢，每一次改动都牵涉较多</strong></p>
+<h3 id="当前数据平台架构失败的原因"><a href="#当前数据平台架构失败的原因" class="headerlink" title="当前数据平台架构失败的原因"></a>当前数据平台架构失败的原因</h3><ul>
+<li>集中式 + 单体<ul>
+<li>功能职责<ul>
+<li>注入数据：从各类数据源采集数据，并保存在数据平台；</li>
+<li>清洗、丰富和转换：根据需求处理数据；</li>
+<li>提供服务：满足分享、业务、智能等各类消费需求；</li>
+</ul>
+</li>
+<li>问题：忽略了数据的领域划分，仅适合于领域简单、消费多样性低的企业；<ul>
+<li>数据源众多导致数据多样化，该模式无法很好满足巨型企业多领域数据持续增加数据源，管理成本过高；</li>
+<li>数据平台的响应时间与快速创新数据消费需求的矛盾；</li>
+</ul>
+</li>
+<li>澄清：<ul>
+<li>data mash 不是碎片化、孤立的组织面向领域的数据；</li>
+<li>data mash 不是多个独立的积累了大量技术债的数据仓库；</li>
+<li>打破数据孤岛并非建立集中式数据平台一种途径，这存在规模瓶颈；</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>耦合管道分解<ul>
+<li>数据平台架构，其实就是对集成、清洗、聚合、服务等基本功能的解耦；</li>
+<li>主要任务：在上线新数据源和响应新消费需求不断增长下，架构师需要将系统化整为零，进行分解，有利于降低每个功能模块维护组织间的耦合性，提高工作的并行性；</li>
+<li>面对集中式数据平台，架构师需要将其分解为数据处理阶段的管道；</li>
+<li>优势：使系统在一定程度上具备可扩展性；</li>
+<li>问题：相干性减慢了发布特性的速率，前后两个阶段间紧耦合；<ul>
+<li>某些平台提供了可配置数据源，但无法解决端到端的依赖管理；</li>
+<li>对于用户视角，还是需要引入新的数据集；</li>
+<li>虽然在看似数据管道的阶段间是松耦合的，实际上一整条管道，即整个平台才是最小的可变单位；</li>
+<li>架构分解和需求变更是<strong>正交</strong>的；</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>孤立且高度专业化的所有权<ul>
+<li>近距离观测构建和维护数据平台的团队，发现各个部分（数据引入、数据处理、数据消费）之间是完全隔离的，通常缺乏业务或领域的知识；</li>
+<li>缺乏对工程师提供高质量数据的激励；</li>
+</ul>
+</li>
+</ul>
+<h2 id="Data-Mesh"><a href="#Data-Mesh" class="headerlink" title="Data Mesh"></a>Data Mesh</h2><h3 id="核心要素"><a href="#核心要素" class="headerlink" title="核心要素"></a>核心要素</h3><ul>
+<li>Distributed Domain Driven 架构</li>
+<li>Self-serve 平台设计</li>
+<li>技术数据的产品思考</li>
+</ul>
+<h3 id="数据和-DDD-结合"><a href="#数据和-DDD-结合" class="headerlink" title="数据和 DDD 结合"></a>数据和 DDD 结合</h3><h4 id="面向域的数据分解"><a href="#面向域的数据分解" class="headerlink" title="面向域的数据分解"></a>面向域的数据分解</h4><ul>
+<li>传统设计中，数据从领域流入集中仓储，而在 data mash 中领域维护自己的数据；</li>
+<li>数据的实际存储实现可以是集中的，但数据的产生、维护和消费是在相关领域内的；</li>
+<li>领域之间可能存在消费关系；</li>
+<li>强调在不同领域间可能存在数据重复，但这些数据在不同领域内会转换为最合适的形态；</li>
+<li>在面向域的数据平台中，基础组件是域，而非管道阶段；</li>
+</ul>
+<h4 id="面向源头的域数据"><a href="#面向源头的域数据" class="headerlink" title="面向源头的域数据"></a>面向源头的域数据</h4><ul>
+<li><strong>源域数据集（source domain datasets）</strong>表示业务事实，即数据源位于业务系统中，源于反应某一项业务的运行情况；</li>
+<li>运行系统相关的业务团队，不进行需要实现业务能力，还需要提供能够反应系统真是运行情况的源域数据集；</li>
+<li>通常需要聚合多个源对齐数据集才能产生一个域对齐数据集；</li>
+<li><strong>域事件（domain events）</strong>是业务事实的最佳表示；</li>
+<li>历史快照也是有必要的，它聚合了一段时间的事件；</li>
+<li>源域数据集非常基础，且很少改变，类似于原始数据；</li>
+</ul>
+<h4 id="面向消费者（多个消费者共享）的数据"><a href="#面向消费者（多个消费者共享）的数据" class="headerlink" title="面向消费者（多个消费者共享）的数据"></a>面向消费者（多个消费者共享）的数据</h4><ul>
+<li>目标是满足相关组的用例；</li>
+<li>转换源域事件，聚合视图和结构来适配相应的数据访问模型；</li>
+<li>面向域的数据平台需要能够轻松的从原始数据生成不同的面向消费的数据集；</li>
+</ul>
+<h4 id="分布式管道"><a href="#分布式管道" class="headerlink" title="分布式管道"></a>分布式管道</h4><ul>
+<li>虽然数据的所有权归于不同的域，但是数据仍然需要清洗、预处理、聚合、服务等步骤；<ul>
+<li>清洗、标准化等阶段移入源域中；</li>
+<li>聚合等步骤移入消费域中；</li>
+</ul>
+</li>
+<li>每个域数据集必须建立<strong>服务水平目标（service level objectives）</strong>，保证时效性、错误率等；</li>
+<li><strong>质疑</strong>：不同的域中存在重复实现数据管道阶段、工具等的情况；</li>
+</ul>
+<h3 id="数据和产品思维结合"><a href="#数据和产品思维结合" class="headerlink" title="数据和产品思维结合"></a>数据和产品思维结合</h3><p>在分布式的数据所有权和数据管道下，如何保证数据的可访问性（accessibility）、可使用性（usability）和协调（harmonization）。</p>
+<h4 id="域数据即产品"><a href="#域数据即产品" class="headerlink" title="域数据即产品"></a>域数据即产品</h4><ul>
+<li>域数据团队需要把数据作为自己的产品，其他数据科学家和机器学习、数据工程师都作为他们的客户；</li>
+<li>域数据的基本质量：<ul>
+<li>可被发现（discoverable）：注册中心、数据目录、元数据管理（所有者、源头、血统、样本等）等技术实现；数据产品自我注册；</li>
+<li>可寻址（Addressable）：数据被发现后，需要提供唯一的地址方便用户访问；地址转换方式依赖存储类型和数据格式；<strong>一份数据可寻址的标准是关键</strong>；</li>
+<li>真实可信（trustworthy and truthful）：数据所有者需要围绕数据可信建立服务水平目标（service level objective，SLO）；评估数据反应事实的程度；数据清洗和完整性测试等技术常用来保证数据质量；不同域需要定义各自的SLOs;</li>
+<li>自我描述语义与语法（self-describing semantics and syntax）：可以以数据模式（schema）为起点，进行扩展；</li>
+<li>能够互操作且符合全局标准（inter-operable and governed by global standards）：关联不同领域的数据，整合为更理想的形式；制定符合全局数据治理规则的标准，包括字段类型、领域间词义消歧、数据地址转换、通用元数据字段、事件格式；</li>
+<li>全局访问控制（Secure and governed by a global access control）：每个域对自己的数据产品有细粒度的管理；实现方式和一般的分布式系统无异；</li>
+<li>跨职能团队（Domain data cross-functional teams）：两个新角色；<strong>data product owner</strong> 负责定义数据产品，对领域数据集的生命周期负责，应该定义一系列业务相关的关键指标；<strong>data engineer</strong> 负责建立并维护领域内的数据管道；技术授粉，类似于 DevOps；</li>
+</ul>
+</li>
+</ul>
+<h3 id="数据与自服务平台设计的结合"><a href="#数据与自服务平台设计的结合" class="headerlink" title="数据与自服务平台设计的结合"></a>数据与自服务平台设计的结合</h3><ul>
+<li>分布数据所有权带来最大的潜在问题：为了维护领域内数据管道基础设施造成冗余的数据、技术需求。可以通过构建通用的基础设施即服务（DIaaS）解决，但是相关技术在数据领域还不够成熟；</li>
+<li>由数据基础设施团队维护必要的技术，供各个领域用于采集、处理、存储和服务自己的数据；</li>
+<li>建设 Data Infrastructure as a Service（DIaaS）:<ul>
+<li>不包括任何领域特有的概念和业务逻辑；</li>
+<li>屏蔽潜在的组件复杂性；</li>
+<li>面向领域数据工程师，需要具备：<ul>
+<li>Scalable polyglot big data storage，可扩展的多语言大数据存储；</li>
+<li>Encryption for data at rest and in motion，静态和动态数据加密；</li>
+<li>Data product versioning，数据产品版本；</li>
+<li>Data product schema，数据产品模式（摘要）；</li>
+<li>Data product de-identification，数据产品去标识（脱敏？）；</li>
+<li>Unified data access control and logging，统一的数据访问控制和日志；</li>
+<li>Data pipeline implementation and orchestration，数据管道实现和编排；</li>
+<li>Data product discovery, catalog registration and publishing，数据产品发现、目录注册和发布；</li>
+<li>Data governance and standardization，数据治理和标准化；</li>
+<li>Data product lineage，数据产品血缘；</li>
+<li>Data product monitoring/alerting/log，数据产品监控、告警和日志；</li>
+<li>Data product quality metrics (collection and sharing)，数据产品质量指标（收集和分享）；</li>
+<li>In memory data caching，数据缓存；</li>
+<li>Federated identity management，联合身份管理；</li>
+<li>Compute and data locality，计算和数据局部性；</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>当前数据平台的特征：集中、单体、数据管道紧耦合、职责割裂；</li>
+<li>data mash：<ul>
+<li>面向不同的领域的分布式数据产品，由独立的跨职能团队维护，使用统一的 DIaaS 服务；</li>
+<li>通过集中的治理标准实现互操作性；</li>
+</ul>
+</li>
+<li>data lake 等传统平台的工具不是被取代，而是角色转变，领域数据产品成为一等公民；</li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                        <li class="previous">
+                            <a href="/hexo-theme-huxblog/2022/08/10/distributeId/" data-toggle="tooltip" data-placement="top" title="分布式ID生成方案简介">&larr; Previous Post</a>
+                        </li>
+                    
+                    
+                        <li class="next">
+                            <a href="/hexo-theme-huxblog/2021/09/10/kubebuilder/" data-toggle="tooltip" data-placement="top" title="kubebuilder 初体验">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/hexo-theme-huxblog/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/hexo-theme-huxblog/tags/#data mash" title="data mash">data mash</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hexo-theme-huxblog";
+    var disqus_identifier = "http://kaijun.rocks/hexo-theme-huxblog/2021/10/10/data-mash/";
+    var disqus_url = "http://kaijun.rocks/hexo-theme-huxblog/2021/10/10/data-mash/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/Demonbane_x">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/Demonbane">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/demonbane.cn">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/Kaijun">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/kaijun-chen-42089354">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2022 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/hexo-theme-huxblog/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/hexo-theme-huxblog/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/hexo-theme-huxblog/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="http://kaijun.rocks/hexo-theme-huxblog/hexo-theme-huxblog/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
