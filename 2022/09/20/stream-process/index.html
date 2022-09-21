@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          流式计算简介 - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://lunbin.github.io/2022/09/20/stream-process/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://lunbin.github.io/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#stream" title="stream">stream</a>
+                        
+                    </div>
+                    <h1>流式计算简介</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2022-09-20
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="流式计算简介"><a href="#流式计算简介" class="headerlink" title=" 流式计算简介"></a><center> 流式计算简介</center></h1><h2 id="流式计算背景"><a href="#流式计算背景" class="headerlink" title="流式计算背景"></a><strong>流式计算背景</strong></h2><ul>
+<li>流式数据是大数据环境下的一种数据形态，其理论诞生于20世纪末，并在云计算和物联网发展下逐步成为当前的研究热点。流式数据与传统的数据是相对的。与静态、批处理和持久化的数据库相比，流式计算以连续、无边界和瞬时性为特征，适合高速并发和大规模数据实时处理的场景。当前大数据环境下的许多应用呈现多源并发、数据汇聚、在线处理的特征，所以实时数据处理的相关研究迅速发展，并在许多关键领域，如传感网络、金融、医疗、交通和军事领域得到了广泛的应用。</li>
+</ul>
+<h2 id="流式计算理论概念"><a href="#流式计算理论概念" class="headerlink" title="流式计算理论概念"></a><strong>流式计算理论概念</strong></h2><ul>
+<li><h3 id="流"><a href="#流" class="headerlink" title="流"></a>流</h3><p>流分为有界流和无界流。  </p>
+<ul>
+<li><p>无界流 有定义流的开始，但没有定义流的结束。它们会无休止地产生数据。无界流的数据必须持续处理，即数据被摄取后需要立刻处理。我们不能等到所有数据都到达再处理，因为输入是无限的，在任何时候输入都不会完成。处理无界数据通常要求以特定顺序摄取事件，例如事件发生的顺序，以便能够推断结果的完整性。</p>
+</li>
+<li><p>有界流 有定义流的开始，也有定义流的结束。有界流可以在摄取所有数据后再进行计算。有界流所有数据可以被排序，所以并不需要有序摄取。有界流处理通常被称为批处理</p>
+</li>
+</ul>
+<p><img src="stream.png" alt></p>
+</li>
+<li><h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><p>在流数据处理的体系中，时间是一个重要的概念。总体来说，可分为以下三种时间：</p>
+<ul>
+<li><p><strong>事件时间</strong>：即事件实际发生的时间。更准确地说，每一个事件都有一个与它相关的时间戳，并且时间戳是数据记录的一部分（比如手机或者服务器的记录）。事件时间其实就是时间戳。处理时间，即事件被处理的时间。  </p>
+</li>
+<li><p><strong>处理时间</strong>：其实就是处理事件的机器所测量的时间  </p>
+</li>
+<li><p><strong>摄取时间</strong>：也叫作进入时间。它指的是事件进入流处理框架的时间</p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><h3 id="窗口"><a href="#窗口" class="headerlink" title="窗口"></a>窗口</h3><p>窗口是一种机制，它用于将许多事件按照时间或者其他特征分组，从而将每一组作为整体进行分析（比如求和）.窗口（Window）就是从Streaming 到 batch 的一个桥梁.<br>1）Tumbling window（滚动窗口）</p>
+<p><img src="tumbling.png" alt></p>
+<p>2）Sliding Windows（滑动窗口）</p>
+<p><img src="sliding.png" alt></p>
+<p>3）Session Windows（会话窗口）</p>
+<p><img src="session.png" alt></p>
+<p>4）Global Windows</p>
+<p><img src="global.png" alt></p>
+</li>
+<li><h3 id="watermark（水印）"><a href="#watermark（水印）" class="headerlink" title="watermark（水印）"></a><strong>watermark（水印）</strong></h3><p>在使用EventTime处理Stream数据的时候会遇到数据乱序的问题，流处理从Event（事件）产生，流经Source，再到Operator，这中间需要一定的时间。虽然大部分情况下，传输到Operator的数据都是按照事件产生的时间顺序来的，但是也不排除由于网络延迟等原因而导致乱序的产生，特别是使用Kafka的时候，多个分区之间的数据无法保证有序。因此，在进行Window计算的时候，不能无限期地等下去，必须要有个机制来保证在特定的时间后，必须触发Window进行计算，这个特别的机制就是Watermark。Watermark是用于处理乱序事件的, 是用来定义延迟触发窗口操作的时间的。</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">假设数据流为： <span class="number">3</span> -&gt; <span class="number">5</span> -&gt; <span class="number">4</span> -&gt; <span class="number">7</span> </span><br><span class="line"></span><br><span class="line">假设窗口为[<span class="number">0</span>,<span class="number">5</span>)，[<span class="number">5</span>,<span class="number">10</span>)...., 延迟设置为<span class="number">1</span>，</span><br><span class="line">* 当第一条数据<span class="number">4</span>过来的时候，此时watermark为<span class="number">3</span>， 放入[<span class="number">0</span>,<span class="number">5</span>)窗口中，此时由于watermark小于<span class="number">5</span>， 所以不会触发窗口计算， </span><br><span class="line">* 接着<span class="number">5</span>这条数据过来，进入窗口[<span class="number">5</span>,<span class="number">10</span>)中，watermark现在为<span class="number">4</span>，仍然不会触发计算</span><br><span class="line">* <span class="number">4</span>再进来， watermark仍然为<span class="number">4</span>，放入[<span class="number">0</span>,<span class="number">5</span>)窗口中</span><br><span class="line">* 数据<span class="number">7</span>过来的时候，此时watermark就变成了<span class="number">6</span>， 将<span class="number">7</span>这条数据放入[<span class="number">5</span>,<span class="number">10</span>)的窗口，此时由于watermark大于<span class="number">5</span>了， 所以[<span class="number">0</span>,<span class="number">5</span>)这个窗口触发计算，将计算结果发送出去，并关闭窗口， 窗口关闭的同时，窗口中的数据也会一并被删除。</span><br></pre></td></tr></table></figure>
+</li>
+<li><h3 id="窗口延迟关闭"><a href="#窗口延迟关闭" class="headerlink" title="窗口延迟关闭"></a><strong>窗口延迟关闭</strong></h3><p>这种机制的目的是为了一定程度上等待后续延迟的数据，但并不能完全解决数据乱序的问题</p>
+</li>
+<li><h3 id="状态计算"><a href="#状态计算" class="headerlink" title="状态计算"></a><strong>状态计算</strong></h3><p>流式计算分为无状态和有状态两种情况:</p>
+<ul>
+<li><p>无状态的计算观察每个独立事件，并根据最后一个事件输出结果。例如，流处理应用程序从传感器接收温度读数，并在温度超过90度时发出警告。</p>
+</li>
+<li><p>有状态的计算则会基于多个事件输出结果。例如连续三次温度超过90度时发出告警</p>
+</li>
+</ul>
+<p><img src="state.png" alt></p>
+</li>
+</ul>
+<ul>
+<li><h3 id="数据处理语义"><a href="#数据处理语义" class="headerlink" title="数据处理语义"></a><strong>数据处理语义</strong></h3><p>在有状态的数据处理中，如何保障数据的可靠性是一个关键点。保障数据可靠性的方式有以下三种：</p>
+<ul>
+<li><p>at most once：这其实是没有正确性保障的委婉说法——故障发生之后，计数结果可能丢失</p>
+</li>
+<li><p>at least once：这表示计数结果可能大于正确值，但绝不会小于正确值。也就是说，计数程序在发生故障后可能多算，但是绝不会少算</p>
+</li>
+<li><p>exactly once：这指的是系统保证在发生故障后得到的计数结果与正确值一致</p>
+</li>
+</ul>
+</li>
+<li><h3 id="检查点（checkpoint）"><a href="#检查点（checkpoint）" class="headerlink" title="检查点（checkpoint）"></a><strong>检查点（checkpoint）</strong></h3><p>checkpoint机制可以保证流式计算在某个算子因为某些原因 (如 异常退出)出现故障时，能够将整个应用流图的状态恢复到故障之前的某一状态，保证应用流图状态的一致性， 用于故障恢复</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">假设 对流数据 <span class="number">1</span> -&gt; <span class="number">2</span> -&gt; <span class="number">3</span> -&gt; <span class="number">4</span> -&gt; ... -&gt; <span class="number">100</span>做求和的处理， </span><br><span class="line">当我在累加的过程中算到<span class="number">50</span>的时候， 任务挂了， 在没有checkpoint的情况下， </span><br><span class="line">将整个数据流重新计算一遍即可。 如果有checkpoint的情况下，假设是在计算<span class="number">40</span>的时候做的checkpint，</span><br><span class="line">那么checkpint中有保存 <span class="number">40</span>以及当下对应的总和<span class="number">820</span>，</span><br><span class="line"> 此时故障恢复的时候，就可以从<span class="number">41</span>开始进行累加计算，避免的大量的重复计算。</span><br></pre></td></tr></table></figure>
+</li>
+<li><h3 id="任务拓扑结构"><a href="#任务拓扑结构" class="headerlink" title="任务拓扑结构"></a><strong>任务拓扑结构</strong></h3><p>描述计算子任务的先后顺序以及依赖关系。不同计算框架对其解析，分配计算资源。</p>
+</li>
+</ul>
+<h2 id="流式计算使用场景"><a href="#流式计算使用场景" class="headerlink" title="流式计算使用场景"></a><strong>流式计算使用场景</strong></h2><ul>
+<li><p>物联网（IoT）</p>
+<ul>
+<li>设备故障告警：极其迅速感知到故障的发生，并及时进行告警。</li>
+<li>实时监控：实时分析设备的监控数据，实现对设备各项指标的实时监控。</li>
+<li>动态跟踪：实时跟踪并显示设备（比如汽车）的位置。</li>
+</ul>
+</li>
+<li><p>金融行业</p>
+<ul>
+<li>欺诈探测：实时分析用户行为，并及时辨识到可疑欺诈行为。</li>
+<li>客户营销：根据用户即时的行为记录，实时为客户推荐个性化的金融产品。</li>
+<li>数据运营：根据业务需求灵活组合使用和业务集成，实现“数据驱动业务”。</li>
+</ul>
+</li>
+<li><p>电商行业</p>
+<ul>
+<li>个性化精准推荐：实时掌握用户的需求和喜好，进行个性化精准推荐。</li>
+<li>实时报表：多维度实时了解PV\UV、销量、销售额、地域分布等。</li>
+<li>实时感知变化趋势：对商品整体的热度和关注量进行动态监测，感知商品关注度变化趋势。</li>
+</ul>
+</li>
+</ul>
+<h2 id="开源流式计算框架介绍"><a href="#开源流式计算框架介绍" class="headerlink" title="开源流式计算框架介绍"></a><strong>开源流式计算框架介绍</strong></h2><ul>
+<li><h3 id="Apache-Storm"><a href="#Apache-Storm" class="headerlink" title="Apache Storm"></a><strong>Apache Storm</strong></h3><p>Apache Storm（后续简称为 Storm）是一款由 Twitter 开源的大规模分布式流计算平台，并且在2014年变成了Apache的顶层项目。毫无疑问，Storm是大规模流处理中的先行者并且逐渐成为了行业标准。Storm是一个典型的Native Streaming系统并且提供了大量底层的操作接口。另外，Storm使用了Thrift来进行拓扑的定义，并且提供了大量其他语言的接口。</p>
+<p><img src="storm.png" alt></p>
+<p><img src="storm_topology.png" alt></p>
+</li>
+</ul>
+<ul>
+<li><h3 id="Apache-Spark-Streaming"><a href="#Apache-Spark-Streaming" class="headerlink" title="Apache Spark Streaming"></a><strong>Apache Spark Streaming</strong></h3><p>说到 Spark Streaming，还得从 Spark 谈起。如今在大数据的世界里，Spark 早已是众所周知的大数据处理和分析框架。Spark 在其诞生之初，由于采用内存计算和 DAG 简化处理流程的原因，使得大数据处理性能得到显著提升，一下子就将传统大数据批处理框架 Hadoop MapReduce 比了下去，取而代之成为大数据领域最耀眼的明星框架。  </p>
+<p>后来随着流计算技术的兴起，Spark 在批处理领域取得巨大成功之后，也开始将其触角延伸到流计算领域，于是诞生了 Spark Streaming。Spark Streaming 是一种建立在 Spark 批处理技术上的流计算框架，它提供了可扩展、高吞吐和错误容忍的流数据处理功能。</p>
+<p><img src="sparkstream.png" alt></p>
+</li>
+</ul>
+<ul>
+<li><h3 id="Apache-Kafka-Stream"><a href="#Apache-Kafka-Stream" class="headerlink" title="Apache Kafka Stream"></a><strong>Apache Kafka Stream</strong></h3><p>Kafka Stream是Apache Kafka从0.10版本引入的一个新Feature。它是提供了对存储于Kafka内的数据进行流式处理和分析的功能。Kafka Stream的特点如下：</p>
+<ul>
+<li>Kafka Stream提供了一个非常简单而轻量的Library，它可以非常方便地嵌入任意Java应用中，也可以任意方式打包和部署</li>
+<li>除了Kafka外，无任何外部依赖</li>
+<li>充分利用Kafka分区机制实现水平扩展和顺序性保证</li>
+<li>通过可容错的state store实现高效的状态操作（如windowed join和aggregation）</li>
+<li>支持正好一次处理语义</li>
+<li>提供记录级的处理能力，从而实现毫秒级的低延迟</li>
+<li>支持基于事件时间的窗口操作，并且可处理晚到的数据（late arrival of records）</li>
+<li>同时提供底层的处理原语Processor（类似于Storm的spout和bolt），以及高层抽象的DSL（类似于Spark的map/group/reduce）  </li>
+</ul>
+<p><img src="kafkastream.png" alt></p>
+</li>
+</ul>
+<ul>
+<li><h3 id="Apache-Flink"><a href="#Apache-Flink" class="headerlink" title="Apache Flink"></a><strong>Apache Flink</strong></h3><p>Apache Flink 是一个框架和分布式处理引擎，用于在无边界和有边界数据流上进行有状态的计算。Flink 能在所有常见集群环境中运行，并能以内存速度和任意规模进行计算。</p>
+<ul>
+<li>有状态计算的Exactly-once语义。状态是指flink能够维护数据在时序上的聚类和聚合，同时它的checkpoint机制</li>
+<li>支持带有事件时间（event time）语义的流处理和窗口处理。事件时间的语义使流计算的结果更加精确，尤其在事件到达无序或者延迟的情况下。</li>
+<li>支持高度灵活的窗口（window）操作。支持基于time、count、session，以及data-driven的窗口操作，能很好的对现实环境中的创建的数据进行建模。</li>
+<li>轻量的容错处理（ fault tolerance）。 它使得系统既能保持高的吞吐率又能保证exactly-once的一致性。通过轻量的state snapshots实现</li>
+<li>支持高吞吐、低延迟、高性能的流处理</li>
+<li>支持savepoints 机制（一般手动触发）。即可以将应用的运行状态保存下来；在升级应用或者处理历史数据是能够做到无状态丢失和最小停机时间。</li>
+<li>支持大规模的集群模式，支持yarn、Mesos。可运行在成千上万的节点上</li>
+<li>支持具有Backpressure功能的持续流模型</li>
+<li>Flink在JVM内部实现了自己的内存管理</li>
+<li>支持迭代计算</li>
+<li>支持程序自动优化：避免特定情况下Shuffle、排序等昂贵操作，中间结果进行缓存</li>
+</ul>
+<hr>
+<p><img src="flink.png" alt></p>
+</li>
+</ul>
+<ul>
+<li><h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a><strong>比较</strong></h3><p><img src="bijiao.png" alt></p>
+</li>
+</ul>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                    
+                        <li class="next">
+                            <a href="/2022/08/11/hello/" data-toggle="tooltip" data-placement="top" title="hello">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#stream" title="stream">stream</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2022 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://lunbin.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://lunbin.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
