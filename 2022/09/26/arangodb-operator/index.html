@@ -13,11 +13,11 @@
 
     <title>
         
-          hello - lbsheng的博客 | lbsheng&#39;s Blog
+          arangodb on k8s - lbsheng的博客 | lbsheng&#39;s Blog
         
     </title>
 
-    <link rel="canonical" href="https://lunbin.github.io/2022/08/11/hello/">
+    <link rel="canonical" href="https://lunbin.github.io/2022/09/26/arangodb-operator/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -90,6 +90,13 @@
 
                         
                         <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
                             <a href="/archives/">Archives</a>
                         </li>
                         
@@ -98,13 +105,6 @@
                         
                         <li>
                             <a href="/tags/">Tags</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
-                            <a href="/about/">About</a>
                         </li>
                         
                     
@@ -155,7 +155,7 @@
 <!-- Post Header -->
 <style type="text/css">
     header.intro-header{
-        background-image: url('post-bg-unix-linux.jpg')
+        background-image: url('/img/home-bg.jpg')
     }
 </style>
 <header class="intro-header" >
@@ -165,12 +165,16 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                          <a class="tag" href="/tags/#aranago" title="aranago">aranago</a>
+                        
+                          <a class="tag" href="/tags/#k8s operator" title="k8s operator">k8s operator</a>
+                        
                     </div>
-                    <h1>hello</h1>
+                    <h1>arangodb on k8s</h1>
                     <h2 class="subheading"></h2>
                     <span class="meta">
                         Posted by Lunbing Sheng on
-                        2022-08-11
+                        2022-09-26
                     </span>
                 </div>
             </div>
@@ -189,8 +193,26 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-                <h1 id="1-标题1"><a href="#1-标题1" class="headerlink" title="1.标题1"></a>1.标题1</h1><hr>
-<h2 id="标题2"><a href="#标题2" class="headerlink" title="标题2"></a>标题2</h2>
+                <h1 id="arangodb-on-k8s"><a href="#arangodb-on-k8s" class="headerlink" title="arangodb on k8s"></a>arangodb on k8s</h1><ul>
+<li>install arangodb operator</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f https://raw.githubusercontent.com/arangodb/kube-arangodb/1.2.17/manifests/arango-crd.yaml</span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/arangodb/kube-arangodb/1.2.17/manifests/arango-deployment.yaml</span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/arangodb/kube-arangodb/1.2.17/manifests/arango-storage.yaml</span><br><span class="line">kubectl apply -f https://raw.githubusercontent.com/arangodb/kube-arangodb/1.2.17/manifests/arango-deployment-replication.yaml</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>create pv</p>
+<p>pv.yaml (默认arangodbDeployment创建的pvc大小是8g)</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolume</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">single-server-pv</span></span><br><span class="line">  <span class="attr">labels:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">local</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">capacity:</span></span><br><span class="line">    <span class="attr">storage:</span> <span class="string">10Gi</span></span><br><span class="line">  <span class="attr">accessModes:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">ReadWriteOnce</span></span><br><span class="line">  <span class="attr">hostPath:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">"/home/lunbing/arangodbstorage"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>create arangodbDeployment instance</p>
+<p>single-server.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">"database.arangodb.com/v1alpha"</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">"ArangoDeployment"</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">"single-server"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">mode:</span> <span class="string">Single</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>open web ui</p>
+</li>
+</ul>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">访问： https://cluster-host-ip:single-server-ea中的node<span class="keyword">port</span></span><br><span class="line"></span><br><span class="line">默认用户名为root， 秘密为空，进入之后， 可以修改root 密码</span><br></pre></td></tr></table></figure>
+
 
                 <hr>
 
@@ -198,13 +220,9 @@
 
                 <ul class="pager">
                     
-                        <li class="previous">
-                            <a href="/2022/09/20/stream-process/" data-toggle="tooltip" data-placement="top" title="流式计算简介">&larr; Previous Post</a>
-                        </li>
-                    
                     
                         <li class="next">
-                            <a href="/2022/08/10/spark-on-k8s/" data-toggle="tooltip" data-placement="top" title="spark-on-k8s简介">Next Post &rarr;</a>
+                            <a href="/2022/09/20/stream-process/" data-toggle="tooltip" data-placement="top" title="流式计算简介">Next Post &rarr;</a>
                         </li>
                     
                 </ul>
@@ -231,6 +249,10 @@
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
                        
+                          <a class="tag" href="/tags/#aranago" title="aranago">aranago</a>
+                        
+                          <a class="tag" href="/tags/#k8s operator" title="k8s operator">k8s operator</a>
+                        
                     </div>
                 </section>
                 
