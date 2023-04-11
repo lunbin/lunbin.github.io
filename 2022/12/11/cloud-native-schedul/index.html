@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content>
+    <meta name="keyword" content>
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+          云原生任务调度 - lbsheng的博客 | lbsheng&#39;s Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://lunbin.github.io/2022/12/11/cloud-native-schedul/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Highlight CSS -->
+    <link rel="stylesheet" href="/css/highlight.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="https://cdn.staticfile.org/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">lbsheng&#39;s Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archives/">Archives</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+                        
+                    
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    
+<!-- Image to hack wechat -->
+<!-- <img src="https://lunbin.github.io/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/home-bg.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                    <h1>云原生任务调度</h1>
+                    <h2 class="subheading"></h2>
+                    <span class="meta">
+                        Posted by Lunbing Sheng on
+                        2022-12-11
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="airflow"><a href="#airflow" class="headerlink" title="airflow"></a>airflow</h2><ul>
+<li><h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3></li>
+</ul>
+<ol>
+<li><p>组件包括 webserver， scheudler， worker（可能多个）<br>webserver 就是webui， 展示所有的任务以及相关的运行状况。  </p>
+</li>
+<li><p>airflow 可以部署在本地， 也可以部署在k8s上， 对我们现在的情况， 如果要使用airflow的话，应该是要部署在k8s上的。 airflow 部署在k8s上的有两种模式。一种是部署 一个webserver， 一个scheudler，以及固定个数的worker。 这种方式和在本地部署相同的。 还有一种是利用k8s的弹性调度的优点， 部署的时候只需要部署webserver scheudler，executor 使用kubernete executor， 这种一旦有任务的时候， 会自动启动pod 去执行任务。任务执行结束后， pod 会自动删除。高效的利用资源。其实就是将worker的个数动态化。</p>
+</li>
+</ol>
+<ul>
+<li><h3 id="任务的定义"><a href="#任务的定义" class="headerlink" title="任务的定义"></a>任务的定义</h3></li>
+</ul>
+<ol>
+<li>airflow的任务定义完全使用python。 所以对python的环境会有依赖。 其中最重要的包有apache-airflow, kubernetes, apache-airflow-providers-cncf-kubernetes。其中最后一个中包含了 kubernetes-operator。</li>
+</ol>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">example:</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> datetime import timedelta</span><br><span class="line"><span class="keyword">from</span> textwrap import dedent</span><br><span class="line"><span class="keyword">from</span> airflow import DAG</span><br><span class="line"><span class="keyword">from</span> airflow.operators.bash import BashOperator</span><br><span class="line"><span class="keyword">from</span> airflow.utils.dates import days_ago</span><br><span class="line"></span><br><span class="line">default_args = &#123;</span><br><span class="line">    <span class="string">'owner'</span>: <span class="string">'airflow'</span>,</span><br><span class="line">    <span class="string">'depends_on_past'</span>: <span class="literal">False</span>,</span><br><span class="line">    <span class="string">'email'</span>: [<span class="string">'airflow@example.com'</span>],</span><br><span class="line">    <span class="string">'email_on_failure'</span>: <span class="literal">False</span>,</span><br><span class="line">    <span class="string">'email_on_retry'</span>: <span class="literal">False</span>,</span><br><span class="line">    <span class="string">'retries'</span>: 1,</span><br><span class="line">    <span class="string">'retry_delay'</span>: timedelta(<span class="attribute">minutes</span>=5),</span><br><span class="line">&#125;</span><br><span class="line">with DAG(</span><br><span class="line">    <span class="string">'tutorial'</span>,</span><br><span class="line">    <span class="attribute">default_args</span>=default_args,</span><br><span class="line">    <span class="attribute">description</span>=<span class="string">'A simple tutorial DAG'</span>,</span><br><span class="line">    <span class="attribute">schedule_interval</span>=timedelta(days=1),</span><br><span class="line">    <span class="attribute">start_date</span>=days_ago(2),</span><br><span class="line">    tags=[<span class="string">'example'</span>],</span><br><span class="line">) as dag:</span><br><span class="line"></span><br><span class="line">    # t1, t2 <span class="keyword">and</span> t3 are examples of tasks created by instantiating operators</span><br><span class="line">    t1 = BashOperator(</span><br><span class="line">        <span class="attribute">task_id</span>=<span class="string">'print_date'</span>,</span><br><span class="line">        <span class="attribute">bash_command</span>=<span class="string">'date'</span>,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    t2 = BashOperator(</span><br><span class="line">        <span class="attribute">task_id</span>=<span class="string">'sleep'</span>,</span><br><span class="line">        <span class="attribute">depends_on_past</span>=<span class="literal">False</span>,</span><br><span class="line">        <span class="attribute">bash_command</span>=<span class="string">'sleep 5'</span>,</span><br><span class="line">        <span class="attribute">retries</span>=3,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    t3 = BashOperator(</span><br><span class="line">        <span class="attribute">task_id</span>=<span class="string">'templated'</span>,</span><br><span class="line">        <span class="attribute">depends_on_past</span>=<span class="literal">False</span>,</span><br><span class="line">        <span class="attribute">bash_command</span>=templated_command,</span><br><span class="line">        params=&#123;<span class="string">'my_param'</span>: <span class="string">'Parameter I passed in'</span>&#125;,</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    t1 &gt;&gt; [t2, t3]</span><br></pre></td></tr></table></figure>
+<p>其中 t1 &gt;&gt; [t2, t3] 就是定义的依赖关系， 上面的BashOperator 很好理解， 就是运行shell 命令。 我们关注的kubernetes-operator 需要使用到 apache-airflow-providers-cncf-kubernetes这个包， 其中这个包的使用在依赖上有写限制。</p>
+<table>
+<thead>
+<tr>
+<th>PIP package</th>
+<th style="text-align:center">Version required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>apache-airflow</td>
+<td style="text-align:center">&gt;=2.1.0</td>
+</tr>
+<tr>
+<td>cryptography</td>
+<td style="text-align:center">&gt;=2.0.0</td>
+</tr>
+<tr>
+<td>kubernetes</td>
+<td style="text-align:center">&gt;=3.0.0, &lt;12.0.0</td>
+</tr>
+</tbody>
+</table>
+<p>在使用的过程中，由于我拉取的镜像不带apache-airflow-providers-cncf-kubernetes， 需要基于原来的镜像重新做， 但是原来的镜像中的各个包的版本不符合上述规范。遇到了一些问题，所以这块花了挺多时间的。</p>
+<p>重点说下 airflow 的 kubernetes-operators， 先看下例子：<br><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">quay_k8s = KubernetesPodOperator(</span><br><span class="line">       <span class="attribute">namespace</span>=<span class="string">'default'</span>,</span><br><span class="line">       <span class="attribute">image</span>=<span class="string">'quay.io/apache/bash'</span>,</span><br><span class="line">       image_pull_secrets=[k8s.V1LocalObjectReference(<span class="string">'testquay'</span>)],</span><br><span class="line">       cmds=[<span class="string">"bash"</span>, <span class="string">"-cx"</span>],</span><br><span class="line">       arguments=[<span class="string">"echo"</span>, <span class="string">"10"</span>, <span class="string">"echo pwd"</span>],</span><br><span class="line">       labels=&#123;<span class="string">"foo"</span>: <span class="string">"bar"</span>&#125;,</span><br><span class="line">       <span class="attribute">name</span>=<span class="string">"airflow-private-image-pod"</span>,</span><br><span class="line">       <span class="attribute">is_delete_operator_pod</span>=<span class="literal">True</span>,</span><br><span class="line">       <span class="attribute">in_cluster</span>=<span class="literal">True</span>,</span><br><span class="line">       <span class="attribute">task_id</span>=<span class="string">"task-two"</span>,</span><br><span class="line">       <span class="attribute">get_logs</span>=<span class="literal">True</span>,</span><br><span class="line">   )</span><br></pre></td></tr></table></figure></p>
+<p>上面指定了ns， image以及k8s pod相关的一些属性， 它的作用就是会在对应的k8s集群上启动相应的pod， 使用定义的镜像， 运行任务。 这里因为需要去k8s集群上创建pod， 那么就意味着， 需要指定k8s集群的地址， 即 ~/.kube/config. 同时如果airflow 部署在k8s上, 且使用的 kubenetes-executor的方式， 那么出现的现象是kubenetes-executor 会启动一个worker（一个pod）， 在这个worker中执行 kubenetes-operator， 所以这个worker（需要有配置好的 ~/.kube/config）， 会再创建一个pod去执行任务， 这个pod使用的镜像就是上面image这个字段定义的镜像。 个人觉得， 这个地方为了使用k8s去跑job， 有点臃肿。 感觉kubernete-operator这种operator， 比较适合airflow 的本地部署的环境， 而不是特别适合和kubernete-executor一起使用。当然本身， airflow 也不是为k8s量身定做的。</p>
+<hr>
+<h2 id="argo"><a href="#argo" class="headerlink" title="argo"></a>argo</h2><p>Argo Workflows是一个开源的容器本地工作流引擎，用于在kubernetes上协调运行作业。Argo Workflows是基于kubernetes CRD实现的</p>
+<ul>
+<li>定义工作流，其中工作流中的每一个步骤都是一个容器</li>
+<li>将多个步骤工作流建模成一系列的任务，或者使用有向无环图（DAG）捕获任务间的依赖关系</li>
+<li><p>使用kubernetes上的Argo Workflows可以在短时间内轻松操作大量计算密集型作业</p>
+<h3 id="部署-1"><a href="#部署-1" class="headerlink" title="部署"></a>部署</h3><p>部署比较简单。github 上有对应的 <a href="https://raw.githubusercontent.com/argoproj/argo-workflows/master/manifests/quick-start-postgres.yaml" target="_blank" rel="noopener">install.yaml</a> 文件, 使用kubectl直接部署。两个组件：argo-server, workflow-controller</p>
+<h3 id="任务定义"><a href="#任务定义" class="headerlink" title="任务定义"></a>任务定义</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Workflow</span>                  <span class="comment"># new type of k8s spec</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">generateName:</span> <span class="string">hello-world-</span>    <span class="comment"># name of the workflow spec</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="comment"># 调用whalesay模板，这个工作流yaml,                                         </span></span><br><span class="line"><span class="comment"># 主要学习entrypoint、templates</span></span><br><span class="line"><span class="comment"># 在Workflow中 入口entrypoint决定从哪个模板开始</span></span><br><span class="line"><span class="comment"># templates定义所有的模板内容</span></span><br><span class="line">  <span class="attr">entrypoint:</span> <span class="string">whalesay</span></span><br><span class="line">  <span class="attr">templates:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">whalesay</span>              <span class="comment"># name of the template</span></span><br><span class="line">    <span class="attr">container:</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">docker/whalesay</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">[cowsay]</span></span><br><span class="line">      <span class="attr">args:</span> <span class="string">["hello</span> <span class="string">world"]</span></span><br><span class="line">      <span class="attr">resources:</span>                <span class="comment"># limit the resources</span></span><br><span class="line">        <span class="attr">limits:</span></span><br><span class="line">          <span class="attr">memory:</span> <span class="string">32Mi</span></span><br><span class="line">          <span class="attr">cpu:</span> <span class="string">100m</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>kind 为workflow, 可通过argo 命令提交， 也可以使用kubectl去创建<br>  <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">argo</span> <span class="selector-tag">submit</span> <span class="selector-tag">hello-world</span><span class="selector-class">.yaml</span></span><br><span class="line">或者</span><br><span class="line"><span class="selector-tag">kubectl</span> <span class="selector-tag">-n</span> <span class="selector-tag">ns</span> <span class="selector-tag">create</span> <span class="selector-tag">-f</span> <span class="selector-tag">hello-world</span><span class="selector-class">.yaml</span></span><br></pre></td></tr></table></figure></p>
+<p>argo也是有webui 的。 可以看到整个job 的情况， 以及依赖的拓扑结构。</p>
+<p>  STEPS</p>
+  <figure class="highlight less"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="attribute">apiVersion</span>: argoproj.io/v1alpha1</span><br><span class="line"><span class="attribute">kind</span>: Workflow</span><br><span class="line"><span class="attribute">metadata</span>:</span><br><span class="line">  <span class="attribute">generateName</span>: steps-</span><br><span class="line"><span class="attribute">spec</span>:</span><br><span class="line">  <span class="attribute">entrypoint</span>: hello-hello-hello</span><br><span class="line">  #两个包含容器的模板：hello-hello-hello and whalesay</span><br><span class="line">  <span class="attribute">templates</span>:</span><br><span class="line">  - <span class="attribute">name</span>: hello-hello-hello</span><br><span class="line">    # 这个模板中包含很多步骤，每个步骤运行一个容器</span><br><span class="line">    # 步骤按照排列顺序，从上往下，同一个数组内的步骤，是并行执行</span><br><span class="line">    <span class="attribute">steps</span>:</span><br><span class="line">    - - <span class="attribute">name</span>: hello1           </span><br><span class="line">        <span class="attribute">template</span>: whalesay</span><br><span class="line">        <span class="attribute">arguments</span>:</span><br><span class="line">          <span class="attribute">parameters</span>:</span><br><span class="line">          - <span class="attribute">name</span>: message</span><br><span class="line">            <span class="attribute">value</span>: <span class="string">"hello1"</span></span><br><span class="line">    - - <span class="attribute">name</span>: hello2a          </span><br><span class="line">        <span class="attribute">template</span>: whalesay</span><br><span class="line">        <span class="attribute">arguments</span>:</span><br><span class="line">          <span class="attribute">parameters</span>:</span><br><span class="line">          - <span class="attribute">name</span>: message</span><br><span class="line">            <span class="attribute">value</span>: <span class="string">"hello2a"</span></span><br><span class="line">      - <span class="attribute">name</span>: hello2b          </span><br><span class="line">        <span class="attribute">template</span>: whalesay</span><br><span class="line">        <span class="attribute">arguments</span>:</span><br><span class="line">          <span class="attribute">parameters</span>:</span><br><span class="line">          - <span class="attribute">name</span>: message</span><br><span class="line">            <span class="attribute">value</span>: <span class="string">"hello2b"</span></span><br><span class="line">  - <span class="attribute">name</span>: whalesay</span><br><span class="line">    <span class="attribute">inputs</span>:</span><br><span class="line">      <span class="attribute">parameters</span>:</span><br><span class="line">      - <span class="attribute">name</span>: message</span><br><span class="line">    <span class="attribute">container</span>:</span><br><span class="line">      <span class="attribute">image</span>: docker/whalesay</span><br><span class="line">      <span class="attribute">command</span>: [cowsay]</span><br><span class="line">      <span class="attribute">args</span>: [<span class="string">"&#123;&#123;inputs.parameters.message&#125;&#125;"</span>]</span><br></pre></td></tr></table></figure>
+<p>  DAG</p>
+  <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Workflow</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">generateName:</span> <span class="string">dag-diamond-</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">entrypoint:</span> <span class="string">diamond</span></span><br><span class="line">  <span class="attr">templates:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">echo</span></span><br><span class="line">    <span class="attr">inputs:</span></span><br><span class="line">      <span class="attr">parameters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">message</span></span><br><span class="line">    <span class="attr">container:</span></span><br><span class="line">      <span class="attr">image:</span> <span class="string">alpine:3.7</span></span><br><span class="line">      <span class="attr">command:</span> <span class="string">[echo,</span> <span class="string">"<span class="template-variable">&#123;&#123;inputs.parameters.message&#125;&#125;</span>"</span><span class="string">]</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">diamond</span></span><br><span class="line">    <span class="attr">dag:</span></span><br><span class="line">      <span class="attr">tasks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">A</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">echo</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">A&#125;]</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">B</span></span><br><span class="line">        <span class="attr">dependencies:</span> <span class="string">[A]</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">echo</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">B&#125;]</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">C</span></span><br><span class="line">        <span class="attr">dependencies:</span> <span class="string">[A]</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">echo</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">C&#125;]</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">D</span></span><br><span class="line">        <span class="attr">dependencies:</span> <span class="string">[B,</span> <span class="string">C]</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">echo</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">D&#125;]</span></span><br></pre></td></tr></table></figure>
+<p>  argo 的缺点， 就是任务成功后， 对应的pod不会被删除。状态变成Completed, 会一直保留。 使用上需要对k8s的部署需要有一定的了解。 任务之间的关系的部署文件都是通过yaml文件。使用上有些门槛。  </p>
+<hr>
+<h2 id="volcano"><a href="#volcano" class="headerlink" title="volcano"></a>volcano</h2><p>Volcano是基于Kubernetes的高性能批量计算平台，目前支持几乎所有的主流计算框架，包括MindSpore、TensorFlow、Kubeflow、MPI、PyTorch、飞浆、Spark、HOROVOD 等</p>
+<h5 id="部署-2"><a href="#部署-2" class="headerlink" title="部署"></a>部署</h5><p>使用yaml部署，三个组件 volcano-admission， volcano-controllers， volcano-scheduler。 也是需要使用kubernetes 的crd的方式自定义vcjob。volcano 相对于airflow以及argo， 更复杂一点。 Volcano利用声明式的CRD定义我们的API，主要有3个核心的API，Volcano Job、PodGroup、Queue。</p>
+<ul>
+<li>Queue：它是Cluster 级别的资源对象，可为其声明资源配额，也可由多namespace 共享。跟yarn中的queue类似， 将不同类型的job 放入不同的队列， 不同的队列之间相互不影响</li>
+<li><p>PodGroup：与 queue 绑定，占用队列的资源。是任务的分组</p>
+</li>
+<li><p>Volcano Job：真正的任务模块</p>
+</li>
+</ul>
+<h3 id="任务定义-1"><a href="#任务定义-1" class="headerlink" title="任务定义"></a>任务定义</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vcjob.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch.volcano.sh/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">job-1</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">minAvailable:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">schedulerName:</span> <span class="string">volcano</span></span><br><span class="line">  <span class="attr">queue:</span> <span class="string">test</span></span><br><span class="line">  <span class="attr">policies:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">event:</span> <span class="string">PodEvicted</span></span><br><span class="line">      <span class="attr">action:</span> <span class="string">RestartJob</span></span><br><span class="line">  <span class="attr">tasks:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">      <span class="attr">policies:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">event:</span> <span class="string">TaskCompleted</span></span><br><span class="line">        <span class="attr">action:</span> <span class="string">CompleteJob</span></span><br><span class="line">      <span class="attr">template:</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">containers:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">command:</span></span><br><span class="line">              <span class="bullet">-</span> <span class="string">sleep</span></span><br><span class="line">              <span class="bullet">-</span> <span class="string">10m</span></span><br><span class="line">              <span class="attr">image:</span> <span class="string">nginx:latest</span></span><br><span class="line">              <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">              <span class="attr">resources:</span></span><br><span class="line">                <span class="attr">requests:</span></span><br><span class="line">                  <span class="attr">cpu:</span> <span class="number">1</span></span><br><span class="line">                <span class="attr">limits:</span></span><br><span class="line">                  <span class="attr">cpu:</span> <span class="number">1</span></span><br><span class="line">          <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">kubectl</span> <span class="selector-tag">-n</span> <span class="selector-tag">ns</span> <span class="selector-tag">create</span> <span class="selector-tag">-f</span> <span class="selector-tag">vcjob</span><span class="selector-class">.yaml</span></span><br></pre></td></tr></table></figure>
+<p>启动形式： 单独启动一个pod运行， 最终的状态为completed， pod不会删除。</p>
+<p>volcano的设计理念很像yarn，对pod 进行分组， 并且通过设置queue， 把不同类型的job分开， 这里的不同类型的job，指的是像TensorFlow的job， flink 的job， 以及还有像argo的job。volcano 还可以对queue进行资源的限制。</p>
+<p>下面这个是volcano 调度argo workflow 的一个例子 (个人觉得上手还是有点门槛的)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Workflow</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">generateName:</span> <span class="string">volcano-step-job-</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">entrypoint:</span> <span class="string">volcano-step-job</span></span><br><span class="line">  <span class="attr">serviceAccountName:</span> <span class="string">argo</span></span><br><span class="line">  <span class="attr">templates:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">volcano-step-job</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello-1</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">hello-tmpl</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">hello1&#125;,</span> <span class="string">&#123;name:</span> <span class="string">task,</span> <span class="attr">value:</span> <span class="string">hello1&#125;]</span></span><br><span class="line">    <span class="bullet">-</span> <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello-2a</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">hello-tmpl</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">hello2a&#125;,</span> <span class="string">&#123;name:</span> <span class="string">task,</span> <span class="attr">value:</span> <span class="string">hello2a&#125;]</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello-2b</span></span><br><span class="line">        <span class="attr">template:</span> <span class="string">hello-tmpl</span></span><br><span class="line">        <span class="attr">arguments:</span></span><br><span class="line">          <span class="attr">parameters:</span> <span class="string">[&#123;name:</span> <span class="string">message,</span> <span class="attr">value:</span> <span class="string">hello2b&#125;,</span> <span class="string">&#123;name:</span> <span class="string">task,</span> <span class="attr">value:</span> <span class="string">hello2b&#125;]</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">hello-tmpl</span></span><br><span class="line">    <span class="attr">inputs:</span></span><br><span class="line">      <span class="attr">parameters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">message</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">task</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">action:</span> <span class="string">create</span></span><br><span class="line">      <span class="attr">successCondition:</span> <span class="string">status.state.phase</span> <span class="string">=</span> <span class="string">Completed</span></span><br><span class="line">      <span class="attr">failureCondition:</span> <span class="string">status.state.phase</span> <span class="string">=</span> <span class="string">Failed</span></span><br><span class="line">      <span class="attr">manifest:</span> <span class="string">|</span>           <span class="string">//</span> <span class="string">Definition</span> <span class="string">of</span> <span class="string">the</span> <span class="string">VolcanoJob</span></span><br><span class="line">        <span class="attr">apiVersion:</span> <span class="string">batch.volcano.sh/v1alpha1</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line">        <span class="attr">metadata:</span></span><br><span class="line">          <span class="attr">generateName:</span> <span class="string">step-job-&#123;&#123;inputs.parameters.task&#125;&#125;-</span></span><br><span class="line">          <span class="attr">ownerReferences:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">apiVersion:</span> <span class="string">argoproj.io/v1alpha1</span></span><br><span class="line">            <span class="attr">blockOwnerDeletion:</span> <span class="literal">true</span></span><br><span class="line">            <span class="attr">kind:</span> <span class="string">Workflow</span></span><br><span class="line">            <span class="attr">name:</span> <span class="string">"<span class="template-variable">&#123;&#123;workflow.name&#125;&#125;</span>"</span></span><br><span class="line">            <span class="attr">uid:</span> <span class="string">"<span class="template-variable">&#123;&#123;workflow.uid&#125;&#125;</span>"</span></span><br><span class="line">        <span class="attr">spec:</span></span><br><span class="line">          <span class="attr">minAvailable:</span> <span class="number">1</span></span><br><span class="line">          <span class="attr">schedulerName:</span> <span class="string">volcano</span></span><br><span class="line">          <span class="attr">policies:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">event:</span> <span class="string">PodEvicted</span></span><br><span class="line">            <span class="attr">action:</span> <span class="string">RestartJob</span></span><br><span class="line">          <span class="attr">plugins:</span></span><br><span class="line">            <span class="attr">ssh:</span> <span class="string">[]</span></span><br><span class="line">            <span class="attr">env:</span> <span class="string">[]</span></span><br><span class="line">            <span class="attr">svc:</span> <span class="string">[]</span></span><br><span class="line">          <span class="attr">maxRetry:</span> <span class="number">1</span></span><br><span class="line">          <span class="attr">queue:</span> <span class="string">default</span></span><br><span class="line">          <span class="attr">tasks:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">replicas:</span> <span class="number">2</span></span><br><span class="line">            <span class="attr">name:</span> <span class="string">"default-hello"</span></span><br><span class="line">            <span class="attr">template:</span></span><br><span class="line">              <span class="attr">metadata:</span></span><br><span class="line">                <span class="attr">name:</span> <span class="string">helloworld</span></span><br><span class="line">              <span class="attr">spec:</span></span><br><span class="line">                <span class="attr">containers:</span></span><br><span class="line">                <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">docker/whalesay</span></span><br><span class="line">                  <span class="attr">imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line">                  <span class="attr">command:</span> <span class="string">[cowsay]</span></span><br><span class="line">                  <span class="attr">args:</span> <span class="string">["&#123;&#123;inputs.parameters.message&#125;&#125;"]</span></span><br><span class="line">                  <span class="attr">name:</span> <span class="string">hello</span></span><br><span class="line">                  <span class="attr">resources:</span></span><br><span class="line">                    <span class="attr">requests:</span></span><br><span class="line">                      <span class="attr">cpu:</span> <span class="string">"100m"</span></span><br><span class="line">                <span class="attr">restartPolicy:</span> <span class="string">OnFailure</span></span><br></pre></td></tr></table></figure>
+<p>然后这个volcano， 好像是没有webui的。都是通过kubectl去查看， queue， PodGroup以及vcjob。</p>
+
+
+                <hr>
+
+                
+
+                <ul class="pager">
+                    
+                    
+                        <li class="next">
+                            <a href="/2022/09/27/flink-operator/" data-toggle="tooltip" data-placement="top" title="flink-operator">Next Post &rarr;</a>
+                        </li>
+                    
+                </ul>
+
+                
+
+                
+
+            </div>
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#云原生" title="云原生">云原生</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="http://blog.kaijun.rocks" target="_blank">Kaijun&#39;s Blog</a></li>
+                    
+                        <li><a href="http://huangxuan.me" target="_blank">Hux Blog</a></li>
+                    
+                        <li><a href="#" target="_blank">Foo</a></li>
+                    
+                        <li><a href="#" target="_blank">Bar</a></li>
+                    
+                        <li><a href="#" target="_blank">Example Friends</a></li>
+                    
+                        <li><a href="#" target="_blank">It helps SEO</a></li>
+                    
+                </ul>
+                
+            </div>
+
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                
+                
+                    <li>
+                        <a target="_blank" href="https://twitter.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="http://weibo.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank"  href="https://www.linkedin.com/in/lunbin">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; lbsheng&#39;s Blog 2023 
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> 
+                    <span style="display: inline-block; margin: 0 5px;">
+                        <i class="fa fa-heart"></i>
+                    </span> 
+                    Ported by <a href="http://blog.kaijun.rocks">Kaijun</a> | 
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=kaijun&repo=hexo-theme-huxblog&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://lunbin.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-49627206-1';
+    var _gaDomain = 'huangxuan.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '4cc1f2d8f3067386cc5cdb626a202900';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+<!-- Side Catalog -->
+
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="https://lunbin.github.io/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
