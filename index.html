@@ -97,14 +97,14 @@
 
                         
                         <li>
-                            <a href="/archives/">Archives</a>
+                            <a href="/tags/">Tags</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/tags/">Tags</a>
+                            <a href="/archives/">Archives</a>
                         </li>
                         
                     
@@ -184,9 +184,72 @@
 
 <div class="post-preview">
 
+    <a href="/2023/06/02/k8s-operator-cronjob/">
+        <h2 class="post-title">
+            k8s-operator-cronjob
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            
+问题描述:
+
+
+k8s operator 在使用cronjob的情况下， 如何让任务立即执行， 并且对于ConcurrencyPolicy=Forbid 生效， 即不会同时出现两个running的job
+
+
+问题分解:
+
+
+如何立即执行一个job
+在ConcurrencyPolicy=Forbid 的情况下， 如何避免同时出现两个running的pod
+
+
+解决办法
+
+
+问题1
+在构建cr......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lunbing Sheng on
+        2023-06-02
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
+    <a href="/2023/05/19/java-operator-sdk/">
+        <h2 class="post-title">
+            java开发k8s operator
+        </h2>
+        <h3 class="post-subtitle">
+            
+        </h3>
+        <div class="post-content-preview">
+            环境依赖
+java 11
+
+jar包依赖12345&lt;dependency&gt;   &lt;groupId&gt;io.javaoperatorsdk&lt;/groupId&gt;   &lt;artifactId&gt;operator-framework&lt;/artifactId&gt;   &lt;version&gt;4.3.0&lt;/version&gt;&lt;/......
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by Lunbing Sheng on
+        2023-05-19
+    </p>
+
+</div>
+<hr>
+
+<div class="post-preview">
+
     <a href="/2022/12/11/cloud-native-schedul/">
         <h2 class="post-title">
-            云原生任务调度
+            云原生 --- 云原生任务调度
         </h2>
         <h3 class="post-subtitle">
             
@@ -213,7 +276,7 @@ airflow 可以部署在本地， 也可以部署在k8s上， 对我们现在的�
 
     <a href="/2022/09/27/flink-operator/">
         <h2 class="post-title">
-            flink-operator
+            flink --- flink-operator
         </h2>
         <h3 class="post-subtitle">
             
@@ -236,7 +299,7 @@ Install the certificate manager on your Kubernetes cluster to enable adding the 
 
     <a href="/2022/09/26/arangodb-operator/">
         <h2 class="post-title">
-            arangodb on k8s
+            k8s operator --- arangodb on k8s
         </h2>
         <h3 class="post-subtitle">
             
@@ -260,7 +323,7 @@ install arangodb operator
 
     <a href="/2022/09/20/stream-process/">
         <h2 class="post-title">
-            流式计算简介
+            流式计算 --- 流式计算简介
         </h2>
         <h3 class="post-subtitle">
             
@@ -282,7 +345,7 @@ install arangodb operator
 
     <a href="/2022/08/10/spark-on-k8s/">
         <h2 class="post-title">
-            spark-on-k8s简介
+            spark --- spark-on-k8s简介
         </h2>
         <h3 class="post-subtitle">
             
@@ -306,7 +369,7 @@ job 提交到k8s上12345678910111213141516example：../spark-3.1.2-bin-hadoop2.7
 
     <a href="/2022/08/10/spark-operator/">
         <h2 class="post-title">
-            spark-operator 部署使用
+            spark --- spark-operator 部署使用
         </h2>
         <h3 class="post-subtitle">
             
@@ -332,7 +395,7 @@ job 提交到k8s上12345678910111213141516example：../spark-3.1.2-bin-hadoop2.7
 
     <a href="/2022/08/10/graphql/">
         <h2 class="post-title">
-            graphql 笔记
+            graphql --- graphql 笔记
         </h2>
         <h3 class="post-subtitle">
             
@@ -356,7 +419,7 @@ graphql 实际上是将一些逻辑推到了前端， 例如： 前端现在也�
 
     <a href="/2022/08/10/distributeId/">
         <h2 class="post-title">
-            分布式ID生成方案简介
+            分布式 --- 分布式ID生成方案简介
         </h2>
         <h3 class="post-subtitle">
             
@@ -372,58 +435,6 @@ graphql 实际上是将一些逻辑推到了前端， 例如： 前端现在也�
     <p class="post-meta">
         Posted by Lunbing Sheng on
         2022-08-10
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2021/10/10/data-mash/">
-        <h2 class="post-title">
-            data-mash
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            Data Mash
-Proposed by Toughtworks
-Origin: https://martinfowler.com/articles/data-monolith-to-mesh.html
-
-当前企业数据架构特征：集中式、单体、领域不可知
-不足
-第一代：企业数据仓库 + BI。代价昂贵，且存在巨大的技术债务，只有少部分人理解数据，导致在业务层面未能充分实现价值；
-第二代：数据......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by Lunbing Sheng on
-        2021-10-10
-    </p>
-
-</div>
-<hr>
-
-<div class="post-preview">
-
-    <a href="/2021/09/10/kubebuilder/">
-        <h2 class="post-title">
-            kubebuilder 初体验
-        </h2>
-        <h3 class="post-subtitle">
-            
-        </h3>
-        <div class="post-content-preview">
-            kubebuilder 笔记
-导读：自定义资源 CRD（Custom Resource Definition）可以扩展 Kubernetes API，掌握 CRD 是成为 Kubernetes 高级玩家的必备技能，本文将介绍 CRD 编写框架 Kubebuilder基本使用方法，让您真正理解并能快速开发 CRD。
-
-Kubebuilder 是一个使用 CRDs 构建 K8s API 的 SD......
-        </div>
-    </a>
-    <p class="post-meta">
-        Posted by Lunbing Sheng on
-        2021-09-10
     </p>
 
 </div>
@@ -482,7 +493,15 @@ Kubebuilder 是一个使用 CRDs 构建 K8s API 的 SD......
                             
                         
                             
+                            <a href="/tags/#k8s" title="k8s" rel="3">k8s</a>
+                            
                         
+                            
+                            <a href="/tags/#operator" title="operator" rel="3">operator</a>
+                            
+                        
+                            
+                            <a href="/tags/#java" title="java" rel="2">java</a>
                             
                         
                             
@@ -495,6 +514,16 @@ Kubebuilder 是一个使用 CRDs 构建 K8s API 的 SD......
                         
                             
                         
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <a href="/tags/#spark" title="spark" rel="2">spark</a>
                             
                         
                             
